@@ -12,7 +12,7 @@
 # webserver (i use /var/www/html/paste/)
 # useage: ./spaste.pl
 
-use strict;
+#use strict;
 use warnings;
 use IO::Handle;
 use Fcntl ( "F_GETFL", "F_SETFL", "O_NONBLOCK" );
@@ -80,20 +80,35 @@ sub client    # worker
         my $ret = "";
 
         # for (my $i = 0; $i < 100; $i ++)
-        $ret = $cl->read( my $recv, 50000 );
+        $ret = $cl->read( $recv, 50000 );
 
         # faults here if with threads!
 
         if ( defined($ret) && length($recv) > 0 ) {
-            my $rndid = genuniq();
-            print $rndid;
-            print " : storing at /var/www/html/paste/$rndid" . "\n";
-            my $filename = "/var/www/html/paste/$rndid";
-            open( P, '>', $filename ) or die $!;
-            print P $recv;
-            close(P);
-            print $cl "$srvname/paste/$rndid" . "\n";
+            $rndid = genuniq();
+            if ( -e "/var/www/html/paste/$rndid" ) {
+                $rndid = genuinq();
+                writef( $rndid, $recv, $cl );
+            }
+            else {
+                writef( $rndid, $recv, $cl );
+            }
             $cl->close();
+
         }
     }
+
 }
+
+sub writef() {
+    my ( $rndid, $recv, $cl ) = @_;
+    print $rndid;
+    print " : storing at /var/www/html/paste/$rndid" . "\n";
+    my $filename = "/var/www/html/paste/$rndid";
+    open( P, '>', $filename ) or die $!;
+    print P $recv;
+    close(P);
+    print $cl "$srvname/paste/$rndid" . "\n";
+    return 1;
+}
+
