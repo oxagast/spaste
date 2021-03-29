@@ -6,7 +6,7 @@
 # (  O )  (/    ( (_ /    \___ \ )(
 #  \__(_/\_\_/\_/\___\_/\_(____/(__)
 #
-
+# By oxagast, thanks to termbin.org creators for the idea.
 # I would suggest creating an ssl user and pastebot user for this for security reasons.
 # Set the permissions on your valid cert.pm and privkey.pem and on the directory on the
 # webserver (i use /var/www/html/paste/)
@@ -20,14 +20,12 @@ use Socket;
 use IO::Socket::SSL;
 use threads;
 STDOUT->autoflush();
-my $srvname = "https://oxagast.org";
+my $proot   = ""; # paste root if you don't want them going to /var/www/html
+my $host    = "spaste.online"; # change to your server
+my $srvname = "https://" . $host;
 my $port    = "8888";
-my $cer     = "/etc/letsencrypt/live/oxagast.org/cert.pem";
-my $key     = "/etc/letsencrypt/live/oxagast.org/privkey.pem";
-
-#my $sock = IO::Socket::SSL->new (Listen => SOMAXCONN, LocalPort => $port,
-# Blocking => 0, Timeout => 0, ReuseAddr => 1, SSL_server => 1,
-# SSL_cert_file => $cer, SSL_key_file => $key) or die $@;
+my $cer     = "/etc/letsencrypt/live/" . $host . "/cert.pem"; # use your cert
+my $key     = "/etc/letsencrypt/live/" . $host . "/privkey.pem"; # use your privkey
 my $sock = IO::Socket::IP->new(
     Listen    => SOMAXCONN,
     LocalPort => $port,
@@ -38,7 +36,7 @@ my $WITH_THREADS = 0;    # the switch!!
 
 while (1) {
     eval {
-        my $cl = $sock->accept();
+        my $cl = $sock->accept(); # threaded accept
         if ($cl) {
             my $th = threads->create( \&client, $cl );
             $th->detach();
@@ -51,12 +49,12 @@ while (1) {
 }    # forever
 
 sub genuniq {
-    my $pasid;
+    my $pasid; # for unique paste identifier
     my @set = ( 'A' .. 'Z', 'a' .. 'z', 0 .. 9 );
     my $num = $#set;
 
     $pasid .= $set[ rand($num) ] for 1 .. 8;
-    return $pasid;
+    return $pasid; # push it back
 }
 
 sub client    # worker
@@ -86,7 +84,7 @@ sub client    # worker
 
         if ( defined($ret) && length($recv) > 0 ) {
             $rndid = genuniq();
-            if ( -e "/var/www/html/paste/$rndid" ) {
+            if ( -e "/var/www/html/$rndid" ) {
                 $rndid = genuinq();
                 writef( $rndid, $recv, $cl );
             }
@@ -103,12 +101,12 @@ sub client    # worker
 sub writef() {
     my ( $rndid, $recv, $cl ) = @_;
     print $rndid;
-    print " : storing at /var/www/html/paste/$rndid" . "\n";
-    my $filename = "/var/www/html/paste/$rndid";
+    print " : storing at /var/www/html/" . $proot . $rndid . "\n";
+    my $filename = "/var/www/html/" . $proot . $rndid";
     open( P, '>', $filename ) or die $!;
     print P $recv;
     close(P);
-    print $cl "$srvname/paste/$rndid" . "\n";
+    print $cl "$srvname/$rndid" . "\n";
     return 1;
 }
 
