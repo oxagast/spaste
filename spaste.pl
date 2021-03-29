@@ -48,14 +48,6 @@ while (1) {
     }
 }    # forever
 
-sub genuniq {
-    my $pasid; # for unique paste identifier
-    my @set = ( 'A' .. 'Z', 'a' .. 'z', 0 .. 9 );
-    my $num = $#set;
-
-    $pasid .= $set[ rand($num) ] for 1 .. 8;
-    return $pasid; # push it back
-}
 
 sub client    # worker
 {
@@ -83,14 +75,16 @@ sub client    # worker
         # faults here if with threads!
 
         if ( defined($ret) && length($recv) > 0 ) {
-            $rndid = genuniq();
-            while ( -e "$proot$rndid" ) {
-                $rndid = genuinq();
+            my $uniq = 0;
+            $rndid = "";
+            while ($uniq != 1) { if (-e "$proot$rndid" ) {
+                $rndid = genuniq();
+                $uniq = 1;
+
+             }
                 writef( $rndid, $recv, $cl );
-            }
-            else {
-                writef( $rndid, $recv, $cl );
-            }
+
+           }
             $cl->close();
 
         }
@@ -110,3 +104,11 @@ sub writef() {
     return 1;
 }
 
+sub genuniq {
+    my $pasid; # for unique paste identifier
+    my @set = ( 'A' .. 'Z', 'a' .. 'z', 0 .. 9 );
+    my $num = $#set;
+
+    $pasid .= $set[ rand($num) ] for 1 .. 8;
+    return $pasid; # push it back
+}
