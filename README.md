@@ -1,4 +1,4 @@
-A perl SSL encrypted port of https://github.com/solusipse termbin.com.
+A pure perl SSL encrypted port of https://github.com/solusipse/fiche termbin.com.
 
 I suggest adding an ssl group and pastebot user for security purposes.
 
