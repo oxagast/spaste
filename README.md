@@ -1,1 +1,1 @@
-A perl SSL encrypted port of https://github.com/solusipse's termbin.com.
+A perl SSL encrypted port of https://github.com/solusipse termbin.com.
