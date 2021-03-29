@@ -9,7 +9,7 @@
 # By oxagast, thanks to termbin.org creators for the idea.
 # I would suggest creating an ssl user and pastebot user for this for security reasons.
 # Set the permissions on your valid cert.pm and privkey.pem and on the directory on the
-# webserver (i use /var/www/html/paste/)
+# webserver.
 # useage: ./spaste.pl
 
 #use strict;
@@ -20,7 +20,7 @@ use Socket;
 use IO::Socket::SSL;
 use threads;
 STDOUT->autoflush();
-my $proot   = ""; # paste root if you don't want them going to /var/www/html
+my $proot   = "/var/www/html/"; # paste root if not default
 my $host    = "spaste.online"; # change to your server
 my $srvname = "https://" . $host;
 my $port    = "8888";
@@ -84,7 +84,7 @@ sub client    # worker
 
         if ( defined($ret) && length($recv) > 0 ) {
             $rndid = genuniq();
-            if ( -e "/var/www/html/$rndid" ) {
+            while ( -e "$proot$rndid" ) {
                 $rndid = genuinq();
                 writef( $rndid, $recv, $cl );
             }
@@ -101,8 +101,8 @@ sub client    # worker
 sub writef() {
     my ( $rndid, $recv, $cl ) = @_;
     print $rndid;
-    print " : storing at /var/www/html/" . $proot . $rndid . "\n";
-    my $filename = "/var/www/html/" . $proot . $rndid;
+    print " : storing at " . $proot . $rndid . "\n";
+    my $filename =  $proot . $rndid;
     open( P, '>', $filename ) or die $!;
     print P $recv;
     close(P);
