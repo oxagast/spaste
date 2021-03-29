@@ -102,7 +102,7 @@ sub writef() {
     my ( $rndid, $recv, $cl ) = @_;
     print $rndid;
     print " : storing at /var/www/html/" . $proot . $rndid . "\n";
-    my $filename = "/var/www/html/" . $proot . $rndid";
+    my $filename = "/var/www/html/" . $proot . $rndid;
     open( P, '>', $filename ) or die $!;
     print P $recv;
     close(P);
