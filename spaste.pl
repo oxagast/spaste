@@ -15,83 +15,85 @@
 use strict;
 use warnings;
 use IO::Handle;
-use Fcntl ("F_GETFL", "F_SETFL", "O_NONBLOCK");
+use Fcntl ( "F_GETFL", "F_SETFL", "O_NONBLOCK" );
 use Socket;
-use IO::Socket::SSL; 
+use IO::Socket::SSL;
 use threads;
-STDOUT->autoflush ();
+STDOUT->autoflush();
 my $srvname = "https://oxagast.org";
-my $port = "8888";
-my $cer = "/etc/letsencrypt/live/oxagast.org/cert.pem";
-my $key = "/etc/letsencrypt/live/oxagast.org/privkey.pem";
+my $port    = "8888";
+my $cer     = "/etc/letsencrypt/live/oxagast.org/cert.pem";
+my $key     = "/etc/letsencrypt/live/oxagast.org/privkey.pem";
 
 #my $sock = IO::Socket::SSL->new (Listen => SOMAXCONN, LocalPort => $port,
-# Blocking => 0, Timeout => 0, ReuseAddr => 1, SSL_server => 1, 
+# Blocking => 0, Timeout => 0, ReuseAddr => 1, SSL_server => 1,
 # SSL_cert_file => $cer, SSL_key_file => $key) or die $@;
-my $sock = IO::Socket::IP->new (
-  Listen => SOMAXCONN, LocalPort => $port, Blocking => 0, ReuseAddr => 1
+my $sock = IO::Socket::IP->new(
+    Listen    => SOMAXCONN,
+    LocalPort => $port,
+    Blocking  => 0,
+    ReuseAddr => 1
 ) or die $!;
-my $WITH_THREADS = 0;       # the switch!!
+my $WITH_THREADS = 0;    # the switch!!
 
-while (1)
-{
-  eval
-  {
-    my $cl = $sock->accept ();
-    if ($cl) 
-    {   
-            my $th = threads->create (\&client, $cl);   
-            $th->detach (); 
-    }
- }; # eval
- if ($@)
- {
+while (1) {
+    eval {
+        my $cl = $sock->accept();
+        if ($cl) {
+            my $th = threads->create( \&client, $cl );
+            $th->detach();
+        }
+    };                   # eval
+    if ($@) {
         print STDERR "ex: $@\n";
-        exit (1);
- }
-}  # forever
+        exit(1);
+    }
+}    # forever
 
 sub genuniq {
     my $pasid;
-    my @set = ('A'..'Z','a'..'z',0..9);
+    my @set = ( 'A' .. 'Z', 'a' .. 'z', 0 .. 9 );
     my $num = $#set;
 
-    $pasid .= $set[rand($num)] for 1..8;
+    $pasid .= $set[ rand($num) ] for 1 .. 8;
     return $pasid;
 }
 
 sub client    # worker
 {
-  my $cl = shift;
-  # upgrade INET socket to SSL
-  $cl = IO::Socket::SSL->start_SSL($cl,
-    SSL_server => 1,
-    SSL_cert_file => $cer,
-    SSL_key_file => $key
-  ) or die $@;
-  # unblock
-  my $flags = fcntl ($cl, F_GETFL, 0) or die $!;
-  fcntl ($cl, F_SETFL, $flags | O_NONBLOCK) or die $!;
-  print STDERR $cl->peerhost . "/" . $cl->peerport . "\n";
+    my $cl = shift;
 
- while(1) {
- my $ret = "";
+    # upgrade INET socket to SSL
+    $cl = IO::Socket::SSL->start_SSL(
+        $cl,
+        SSL_server    => 1,
+        SSL_cert_file => $cer,
+        SSL_key_file  => $key
+    ) or die $@;
 
-# for (my $i = 0; $i < 100; $i ++)
-    $ret = $cl->read (my $recv, 50000);      
-    # faults here if with threads!
+    # unblock
+    my $flags = fcntl( $cl, F_GETFL, 0 ) or die $!;
+    fcntl( $cl, F_SETFL, $flags | O_NONBLOCK ) or die $!;
+    print STDERR $cl->peerhost . "/" . $cl->peerport . "\n";
 
-    if (defined ($ret) && length ($recv) > 0)
-    {   
-        my $rndid = genuniq();
-        print $rndid;
-        print " : storing at /var/www/html/paste/$rndid" . "\n";
-        my $filename = "/var/www/html/paste/$rndid";
-        open(P, '>', $filename) or die $!;
-        print P $recv;
-        close(P);
-        print $cl "$srvname/paste/$rndid" . "\n";
-  $cl->close ();   
+    while (1) {
+        my $ret = "";
+
+        # for (my $i = 0; $i < 100; $i ++)
+        $ret = $cl->read( my $recv, 50000 );
+
+        # faults here if with threads!
+
+        if ( defined($ret) && length($recv) > 0 ) {
+            my $rndid = genuniq();
+            print $rndid;
+            print " : storing at /var/www/html/paste/$rndid" . "\n";
+            my $filename = "/var/www/html/paste/$rndid";
+            open( P, '>', $filename ) or die $!;
+            print P $recv;
+            close(P);
+            print $cl "$srvname/paste/$rndid" . "\n";
+            $cl->close();
+        }
     }
-  }
 }
