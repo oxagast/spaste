@@ -22,7 +22,6 @@ use threads;
 chdir "/var/www/spaste/";
 STDOUT->autoflush();
 my $logfile = "/var/log/spaste.log"; # log
-open(LOG, '>', $logfile) or die $!;
 my $proot   = "/var/www/html/";     # paste root if not default
 my $host    = "spaste.online";      # change to your server
 my $srvname = "https://" . $host;
@@ -34,9 +33,7 @@ my $sock = IO::Socket::IP->new(
     LocalPort => $port,
     Blocking  => 0,
     ReuseAddr => 1
-) or die {
-print LOG $!
-};
+) or die $!;
 my $WITH_THREADS = 0;                                         # the switch!!
 
 while (1) {
@@ -49,7 +46,6 @@ while (1) {
     };    # eval
     if ($@) {
         print STDERR "ex: $@\n";
-        print LOG "ex: $@\n";
         exit(1);
     }
 }    # forever
@@ -57,7 +53,7 @@ while (1) {
 sub client    # worker
 {
     my $cl = shift;
-
+    open(LOG, '>>', $logfile) or die $!;
     # upgrade INET socket to SSL
     $cl = IO::Socket::SSL->start_SSL(
         $cl,
@@ -91,18 +87,19 @@ sub client    # worker
                     $uniq = 1;
                 }
                 if ( $uniq == 1 ) {
-                    writef( $rndid, $recv, $cl );
+                    writef( $rndid, $recv, $cl, $logfile );
                 }
             }
             $cl->close();
 
         }
     }
-close(LOG);
+    close(LOG);
 }
 
 sub writef() {
-    my ( $rndid, $recv, $cl ) = @_;
+    my ( $rndid, $recv, $cl, $logfile ) = @_;
+    open(LOG, '>>', $logfile) or die $!;
     print LOG "$rndid : storing at $proot$rndid\n";
     print "$rndid : storing at $proot$rndid\n";
     print LOG "$rndid : serving at $srvname/$rndid\n";
@@ -112,6 +109,8 @@ sub writef() {
     print P $recv;
     close(P);
     print $cl "$srvname/$rndid" . "\n";
+    close(LOG);
+
     return 1;
 }
 
