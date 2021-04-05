@@ -19,7 +19,10 @@ use Fcntl ( "F_GETFL", "F_SETFL", "O_NONBLOCK" );
 use Socket;
 use IO::Socket::SSL;
 use threads;
+chdir "/var/www/spaste/";
 STDOUT->autoflush();
+my $logfile = "/var/log/spaste.log"; # log
+open(LOG, '>', $logfile) or die $!;
 my $proot   = "/var/www/html/";     # paste root if not default
 my $host    = "spaste.online";      # change to your server
 my $srvname = "https://" . $host;
@@ -31,7 +34,9 @@ my $sock = IO::Socket::IP->new(
     LocalPort => $port,
     Blocking  => 0,
     ReuseAddr => 1
-) or die $!;
+) or die {
+print LOG $!
+};
 my $WITH_THREADS = 0;                                         # the switch!!
 
 while (1) {
@@ -44,6 +49,7 @@ while (1) {
     };    # eval
     if ($@) {
         print STDERR "ex: $@\n";
+        print LOG "ex: $@\n";
         exit(1);
     }
 }    # forever
@@ -64,6 +70,7 @@ sub client    # worker
     my $flags = fcntl( $cl, F_GETFL, 0 ) or die $!;
     fcntl( $cl, F_SETFL, $flags | O_NONBLOCK ) or die $!;
     print STDERR $cl->peerhost . "/" . $cl->peerport . "\n";
+    print LOG $cl->peerhost . "/" . $cl->peerport . "\n";
 
     while (1) {
         my $ret = "";
@@ -91,12 +98,14 @@ sub client    # worker
 
         }
     }
-
+close(LOG);
 }
 
 sub writef() {
     my ( $rndid, $recv, $cl ) = @_;
+    print LOG "$rndid : storing at $proot$rndid\n";
     print "$rndid : storing at $proot$rndid\n";
+    print LOG "$rndid : serving at $srvname/$rndid\n";
     print "$rndid : serving at $srvname/$rndid\n";
     my $filename = $proot . $rndid;
     open( P, '>', $filename ) or die $!;
