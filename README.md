@@ -1,11 +1,9 @@
 A pure perl SSL encrypted port of https://github.com/solusipse/fiche termbin.com in perl.
 
-I suggest adding an ssl group and pastebot user for security purposes.
+I suggest adding an ssl group and spaste user, the systemd startup/respawn script if its a dedicated setup, and the crontab entry that removes expired pastes, for security purposes.
 
-Useage: `echo "is this thing working?" | ncat --ssl spaste.online 8888`
+Install: `echo "alias sp='openssl s_client -quiet -connect spaste.online:8888 2>/dev/null'" >> ~/.bashrc && source ~/.bashrc`
 
-Pastes easier by adding: `alias sp='ncat --ssl spaste.online 8888'`
+Useage: `echo "yes hello" | sp`
 
-or the more portable but less pretty: `alias sp='openssl s_client -quiet -connect spaste.online:8888 2>/dev/null'`
-
-then running: `source ~/bashrc` so it works in your current session then: `echo "yes hello" | sp`
+Notes: This also works with ncat from the nmap package if you have that installed but for some odd reason not openssl.
