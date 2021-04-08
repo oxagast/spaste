@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>SPaste - Secure Terminal Pastebin</title>
+</head>
+<body>
+You can securely paste to this site (SSL io) with:<br>
+<br>
+Pastes older than 7 days are removed every day at 8am.
+<br><br>
+<code>echo "is this thing working?" | ncat --ssl spaste.online 8888</code>
+<br>
+<br>
+<code>echo "or the less elegant but more portable solution" | openssl s_client -quiet -connect spaste.online:8888 2>/dev/null</code>
+<br><br>
+You can make later pastes easier by adding:<br>
+<code>alias sp='ncat --ssl spaste.online 8888'</code><br>
+OR<br>
+<code>alias sp='openssl s_client -quiet -connect spaste.online:8888 2>/dev/null'</code>
+<br>
+To your ~/.bashrc file and then running source ~/.bashrc
+<br><br>
+Then simply: <code>cat yourfile.txt | sp</code>
+<br><br>
+My source code is hosted on <a href="https://github.com/oxagast/spaste">GitHub</a><br><br>
+This site is donation funded! bitcoin:bc1qeq3fky0mwq89qcxfr9g44ypzvfclxzxfdmf9cj anything is appriciated, thank you!!
+</body>
+</html>
