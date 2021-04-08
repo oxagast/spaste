@@ -8,4 +8,4 @@ Pastes easier by adding: `alias sp='ncat --ssl spaste.online 8888'`
 
 or the more portable but less pretty: `alias sp='openssl s_client -quiet -connect spaste.online:8888 2>/dev/null'`
 
-then running: `source ~/bashrc` so it works in your current session then: `echo "yes hello" | sp
+then running: `source ~/bashrc` so it works in your current session then: `echo "yes hello" | sp`
