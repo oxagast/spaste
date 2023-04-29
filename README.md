@@ -6,4 +6,4 @@ Install: `echo "alias sp='openssl s_client -quiet -connect spaste.online:8888 2>
 
 Useage: `echo "yes hello" | sp`
 
-Notes: This also works with ncat from the nmap package if you have that installed but for some odd reason not openssl.
+Notes: This also works with ncat from the nmap package ( `ncat -ssl spaste.oxasploits.com 8888` ) if you have that installed but for some odd reason not openssl.
