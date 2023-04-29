@@ -19,11 +19,11 @@ use Fcntl ( "F_GETFL", "F_SETFL", "O_NONBLOCK" );
 use Socket;
 use IO::Socket::SSL;
 use threads;
-chdir "/var/www/spaste/";
+chdir "/var/www/spaste.oxasploits.com/";
 STDOUT->autoflush();
 my $logfile = "/var/log/spaste.log"; # log
-my $proot   = "/var/www/html/";     # paste root if not default
-my $host    = "spaste.online";      # change to your server
+my $proot   = "/var/www/spaste.oxasploits.com/p/";     # paste root if not default
+my $host    = "spaste.oxasploits.com";      # change to your server
 my $srvname = "https://" . $host;
 my $port    = "8888";
 my $cer  = "/etc/letsencrypt/live/" . $host . "/cert.pem";    # use your cert
@@ -34,9 +34,11 @@ my $sock = IO::Socket::IP->new(
     Blocking  => 0,
     ReuseAddr => 1
 ) or die $!;
+umask(022);
 my $WITH_THREADS = 0;                                         # the switch!!
 
 while (1) {
+    sleep(0.1);
     eval {
         my $cl = $sock->accept();                             # threaded accept
         if ($cl) {
@@ -70,7 +72,7 @@ sub client    # worker
 
     while (1) {
         my $ret = "";
-
+        sleep(0.1);
         # for (my $i = 0; $i < 100; $i ++)
         $ret = $cl->read( my $recv, 50000 );
 
@@ -100,17 +102,16 @@ sub client    # worker
 sub writef() {
     my ( $rndid, $recv, $cl, $logfile ) = @_;
     open(LOG, '>>', $logfile) or die $!;
-    print LOG "$rndid : storing at $proot$rndid\n";
-    print "$rndid : storing at $proot$rndid\n";
-    print LOG "$rndid : serving at $srvname/$rndid\n";
-    print "$rndid : serving at $srvname/$rndid\n";
+    print LOG "$rndid : storing at $proot/p/$rndid\n";
+    print "$rndid : storing at $proot/p/$rndid\n";
+    print LOG "$rndid : serving at $srvname/p/$rndid\n";
+    print "$rndid : serving at $srvname/p/$rndid\n";
     my $filename = $proot . $rndid;
     open( P, '>', $filename ) or die $!;
     print P $recv;
     close(P);
-    print $cl "$srvname/$rndid" . "\n";
+    print $cl "$srvname/p/$rndid" . "\n";
     close(LOG);
-
     return 1;
 }
 
