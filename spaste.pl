@@ -11,8 +11,6 @@
 # Set the permissions on your valid cert.pm and privkey.pem and on the directory on the
 # webserver.
 # useage: ./spaste.pl
-# v0.3 drastically improved performance by fixing threading and using blocking and a 
-# return to bump out of loop
 
 
 use strict;
@@ -24,6 +22,7 @@ use IO::Socket::SSL;
 use threads;
 chdir "/var/www/spaste.oxasploits.com/";
 STDOUT->autoflush();
+STDERR->autoflush();
 my $logfile = "/var/log/spaste.log";                  # log
 my $proot   = "/var/www/spaste.oxasploits.com/p/";    # paste root if not default
 my $host    = "spaste.oxasploits.com";                # change to your server
@@ -31,6 +30,12 @@ my $srvname = "https://" . $host;
 my $port    = "8888";
 my $cer = "/etc/letsencrypt/live/" . $host . "/cert.pem";       # use your cert
 my $key = "/etc/letsencrypt/live/" . $host . "/privkey.pem";    # use your privkey
+my $ver = "v0.4";
+open(STDERR, ">>", $logfile) or die $!;
+open(LOG, '>>', $logfile) or die $!;
+LOG->autoflush();
+my $datet = purdydate();
+print LOG "$datet Starting spaste $ver using $host:$port\n";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
                                LocalPort => $port,
@@ -42,7 +47,7 @@ my $WITH_THREADS = 1;                                           # the switch!!
 
 while (1) {
   eval {
-    my $cl = $sock->accept();                                   # threaded accept
+    my $cl = $sock->accept() or print LOG "Could not accept connection!";                                   # threaded accept
     if ($cl) {
       my $th = threads->create(\&client, $cl);
       $th->detach();
@@ -52,13 +57,15 @@ while (1) {
     print STDERR "ex: $@\n";
     exit(1);
   }
+  close(LOG);
+  close(STDERR);
 }    # forever
+
+
 
 sub client    # worker
 {
   my $cl = shift;
-  open(LOG, '>>', $logfile) or die $!;
-
   # upgrade INET socket to SSL
   $cl = IO::Socket::SSL->start_SSL(
                                    $cl,
@@ -69,42 +76,39 @@ sub client    # worker
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die $!;
   fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die $!;
-  print STDERR $cl->peerhost . "/" . $cl->peerport . "\n";
-  print LOG $cl->peerhost . "/" . $cl->peerport . "\n";
   while (1) {
     my $ret = "";
     $ret = $cl->read(my $recv, 50000);    # get the data
     if (defined($ret) && length($recv) > 0) {
       my $rndid = "";
-      while ($uniq != 1) {
+      while (1) {
         $rndid = genuniq();
-        if (-e "$proot$rndid") {
-        }
-        else {
+        if (! -e "$proot$rndid") {
           writef($rndid, $recv, $cl, $logfile);
-          $cl->close();                   # close last sock and move on
+          $cl->close() or die $!;                   # close last sock and move on
           return 0;                       # return so we don't get stuck in the loop
         }
       }
     }
   }
-  close(LOG);
 }
 
 
 sub writef() {
   my ($rndid, $recv, $cl, $logfile) = @_;
-  open(LOG, '>>', $logfile) or die $!;
-  print LOG "$rndid : storing at $proot/p/$rndid\n";
+  $datet = purdydate();
+  print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
+  print LOG " $rndid : storing at $proot/p/$rndid\n";
   print "$rndid : storing at $proot/p/$rndid\n";
-  print LOG "$rndid : serving at $srvname/p/$rndid\n";
+  $datet = purdydate();
+  print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
+  print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
   my $filename = $proot . $rndid;
   open(P, '>', $filename) or die $!;
   print P $recv;
   close(P);
-  print $cl "$srvname/p/$rndid" . "\n";
-  close(LOG);
+  print $cl "$srvname/p/$rndid" . "\n" or die $!;
   return 1;
 }
 
@@ -115,4 +119,12 @@ sub genuniq {
   my $num = $#set;
   $pasid .= $set[rand($num)] for 1 .. 8;
   return $pasid;    # push it back
+}
+
+sub purdydate {
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    my $datetime = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
+                                   $year+1900,$mon+1,$mday,$hour,$min,$sec);
+    return $datetime;
 }
