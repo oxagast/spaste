@@ -20,7 +20,6 @@ use Fcntl ("F_GETFL", "F_SETFL", "O_NONBLOCK");
 use Socket;
 use IO::Socket::SSL;
 use threads;
-chdir "/var/www/spaste.oxasploits.com/";
 STDOUT->autoflush();
 STDERR->autoflush();
 my $logfile = "/var/log/spaste.log";                  # log
@@ -30,27 +29,29 @@ my $srvname = "https://" . $host;
 my $port    = "8888";
 my $cer = "/etc/letsencrypt/live/" . $host . "/cert.pem";       # use your cert
 my $key = "/etc/letsencrypt/live/" . $host . "/privkey.pem";    # use your privkey
-my $ver = "v0.4";
+my $ver = "v0.5";
 open(STDERR, ">>", $logfile) or die $!;
 open(LOG, '>>', $logfile) or die $!;
 LOG->autoflush();
 my $datet = purdydate();
 print LOG "$datet Starting spaste $ver using $host:$port\n";
+chdir "/var/www/spaste.oxasploits.com/" or die "$datet $!";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
                                LocalPort => $port,
                                Blocking  => 1,
                                ReuseAddr => 1
-) or die $!;
+) or die "$datet $!";
 umask(022);
 my $WITH_THREADS = 1;                                           # the switch!!
 
 while (1) {
   eval {
-    my $cl = $sock->accept() or print LOG "Could not accept connection!";                                   # threaded accept
+    my $cl = $sock->accept();                                   # threaded accept
     if ($cl) {
-      my $th = threads->create(\&client, $cl);
-      $th->detach();
+      $datet = purdydate();
+      my $th = threads->create(\&client, $cl) or die "$datet $!";
+      $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
     }
   };    # eval
   if ($@) {
@@ -72,10 +73,10 @@ sub client    # worker
                                    SSL_server    => 1,
                                    SSL_cert_file => $cer,
                                    SSL_key_file  => $key
-  ) or die $@;
+  ) or die "$datet $@";
   # unblock
-  my $flags = fcntl($cl, F_GETFL, 0) or die $!;
-  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die $!;
+  my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
+  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
   while (1) {
     my $ret = "";
     $ret = $cl->read(my $recv, 50000);    # get the data
@@ -85,7 +86,7 @@ sub client    # worker
         $rndid = genuniq();
         if (! -e "$proot$rndid") {
           writef($rndid, $recv, $cl, $logfile);
-          $cl->close() or die $!;                   # close last sock and move on
+          $cl->close() or die "$datet $cl->peerhost $!";                   # close last sock and move on
           return 0;                       # return so we don't get stuck in the loop
         }
       }
@@ -105,10 +106,10 @@ sub writef() {
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
   my $filename = $proot . $rndid;
-  open(P, '>', $filename) or die $!;
+  open(P, '>', $filename) or die "$datet $cl->peerhost $!";;
   print P $recv;
   close(P);
-  print $cl "$srvname/p/$rndid" . "\n" or die $!;
+  print $cl "$srvname/p/$rndid" . "\n" or die "$datet $cl->peerhost $!";
   return 1;
 }
 
