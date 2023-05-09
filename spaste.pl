@@ -57,9 +57,9 @@ while (1) {
     print STDERR "ex: $@\n";
     exit(1);
   }
+}    # forever
   close(LOG);
   close(STDERR);
-}    # forever
 
 
 
