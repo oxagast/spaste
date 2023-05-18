@@ -1,1 +1,0 @@
-0 8 * * * find /var/www/html/ -type f -mtime +7 ! -name "?*.*" -execdir rm -- '{}' \; # remove files without an extension older than 7 days every day at 8am

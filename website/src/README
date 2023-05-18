@@ -1,7 +1,0 @@
-A pure perl SSL encrypted port of https://github.com/solusipse/fiche termbin.com in perl.
-
-Install: `echo "alias sp='openssl s_client -quiet -connect spaste.oxasploits.com:8888 2>/dev/null'" >> ~/.bashrc && source ~/.bashrc`
-
-Useage: `echo "yes hello" | sp`
-
-Notes: This also works with ncat from the nmap package if you have that installed but for some odd reason not openssl.
