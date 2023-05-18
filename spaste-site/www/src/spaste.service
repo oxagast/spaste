@@ -1,0 +1,16 @@
+Description=SPaste Process Restart Upstart Script                                                              
+After=auditd.service systemd-user-sessions.service time-sync.target                                            
+                                                                                                               
+[Service]
+User=spaste
+TimeoutStartSec=0
+Type=simple
+KillMode=process
+WorkingDirectory=/var/www/spaste
+ExecStart=perl /var/www/spaste/spaste.pl                                                                       
+Restart=always
+RestartSec=2
+LimitNOFILE=5555
+
+[Install]
+WantedBy=multi-user.target

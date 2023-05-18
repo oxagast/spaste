@@ -35,7 +35,4 @@ inc/
 /*.zip
 
 *.bak
-<<<<<<< HEAD
-website/p/*
-=======
->>>>>>> 7984d963551dacf0e71889e4f719c8072eae8c6e
+spaste-site/www/p/*
