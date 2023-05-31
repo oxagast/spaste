@@ -27,7 +27,7 @@ my $proot   = "/var/www/spaste.oxasploits.com/p/";    # paste root if not defaul
 my $host    = "spaste.oxasploits.com";                # change to your server
 my $srvname = "https://" . $host;
 my $port    = "8888";
-my $cer = "/etc/letsencrypt/live/" . $host . "/cert.pem";       # use your cert
+my $cer = "/etc/letsencrypt/live/" . $host . "/fullchain.pem";       # use your cert
 my $key = "/etc/letsencrypt/live/" . $host . "/privkey.pem";    # use your privkey
 my $ver = "v0.5";
 open(STDERR, ">>", $logfile) or die $!;
@@ -72,7 +72,10 @@ sub client    # worker
                                    $cl,
                                    SSL_server    => 1,
                                    SSL_cert_file => $cer,
-                                   SSL_key_file  => $key
+                                   SSL_key_file  => $key,
+				   SSL_verifycn_name => $host,
+    				   SSL_verifycn_scheme => 'default',
+                                   SSL_hostname => $host
   ) or die "$datet $@";
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
