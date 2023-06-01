@@ -1,0 +1,1 @@
+May 31 2023: I became aware through brianx that without -verify_return_error in openssl version, and --ssl-verify in the ncat version, this could have been man in the middled.  This has been fixed.  Verification should work against the same letsencrypt signed key that the subdomain's webserver uses.
