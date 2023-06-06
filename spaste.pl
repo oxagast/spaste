@@ -19,17 +19,27 @@ use Fcntl ("F_GETFL", "F_SETFL", "O_NONBLOCK");
 use Socket;
 use IO::Socket::SSL;
 use threads;
+use Config::Tiny;
+use Getopt::Long qw (GetOptions);
+
+if ($#ARGV + 1 ne 2) {
+  die
+"Incorrect number of arguments.  SPaste takes one command line argument, the config file path!";
+}
 STDOUT->autoflush();
 STDERR->autoflush();
-my ($logfile, $proot, $host, $srvname, $port, $cer, $key, $pidfile);
-$logfile = "/var/log/spaste.log";                  # log
-$proot   = "/var/www/spaste.oxasploits.com/p/";    # paste root if not default
-$host    = "spaste.oxasploits.com";                # change to your server
-$srvname = "https://" . $host;
-$port    = "8888";
-$cer     = "/etc/letsencrypt/live/" . $host . "/fullchain.pem";    # use your cert
-$key     = "/etc/letsencrypt/live/" . $host . "/privkey.pem";      # use your privkey
-$pidfile = "/var/run/spaste.pid";
+my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile);
+my $cfgf;
+GetOptions('conf=s' => \$cfgf);
+my $config = Config::Tiny->read($cfgf);
+$host      = $config->{Server}{fqdn};
+$srvname   = $config->{Server}{baseuri};
+$port      = $config->{Server}{listenport};
+$certfile  = $config->{SSL}{certfile};
+$keyfile   = $config->{SSL}{keyfile};
+$pidfile   = $config->{Settings}{pidfile};
+$pasteroot = $config->{Server}{pasteroot};
+$logfile   = $config->{Settings}{logfile};                                      # log
 $SIG{TERM} = $SIG{INT} = sub { unlink($pidfile); die "Caught a sigterm $!" };
 my $ver = "v0.5";
 
@@ -81,8 +91,8 @@ sub client    # worker
   $cl = IO::Socket::SSL->start_SSL(
                                    $cl,
                                    SSL_server          => 1,
-                                   SSL_cert_file       => $cer,
-                                   SSL_key_file        => $key,
+                                   SSL_cert_file       => $certfile,
+                                   SSL_key_file        => $keyfile,
                                    SSL_verifycn_name   => $host,
                                    SSL_verifycn_scheme => 'default',
                                    SSL_hostname        => $host
@@ -98,7 +108,7 @@ sub client    # worker
       my $rndid = "";
       while (1) {
         $rndid = genuniq();
-        if (!-e "$proot$rndid") {
+        if (!-e "$pasteroot$rndid") {
           writef($rndid, $recv, $cl, $logfile);
           $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
           return 0;    # return so we don't get stuck in the loop
@@ -113,13 +123,13 @@ sub writef() {
   my ($rndid, $recv, $cl, $logfile) = @_;
   $datet = purdydate();
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
-  print LOG " $rndid : storing at $proot/p/$rndid\n";
-  print "$rndid : storing at $proot/p/$rndid\n";
+  print LOG " $rndid : storing at $pasteroot/p/$rndid\n";
+  print "$rndid : storing at $pasteroot/p/$rndid\n";
   $datet = purdydate();
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
-  my $filename = $proot . $rndid;
+  my $filename = $pasteroot . $rndid;
   open(P, '>', $filename) or die "$datet $cl->peerhost $!";
   print P $recv;
   close(P);
@@ -149,7 +159,10 @@ sub purdydate {
 
 END {
   unless ($SIG{TERM}) {
-    print "Something unusual happened... check $logfile";
+    print "Something unusual happened... check $logfile\n";
   }
+  print LOG "Removing lockfile...\n";
   unlink($pidfile);
+  print LOG "Stopping SPaste process cleanly...\n";
 }
+
