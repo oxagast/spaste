@@ -148,6 +148,8 @@ sub purdydate {
 
 
 END {
-  print "Something unusual happened... check $logfile";
+  unless ($SIG{TERM}) {
+    print "Something unusual happened... check $logfile";
+  }
   unlink($pidfile);
 }
