@@ -21,10 +21,13 @@ use IO::Socket::SSL;
 use threads;
 use Config::Tiny;
 use Getopt::Long qw (GetOptions);
-
-
+$SIG{TERM} = $SIG{INT} = sub { die "Caught a sigterm $!" };
 STDOUT->autoflush();
 STDERR->autoflush();
+if ($#ARGV + 1 ne 2) {
+  print "Incorrect number of arguments.\n Useage:\n  $ARGV[0] --conf [file]\n";
+    exit $SIG{TERM};
+   }
 my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile);
 my $cfgf = undef;
 GetOptions('conf=s' => \$cfgf);
@@ -37,11 +40,11 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};                                      # log
-$SIG{TERM} = $SIG{INT} = sub { unlink($pidfile); die "Caught a sigterm $!" };
-my $ver = "v0.5";
-#if (checkargs() eq 1) {
-#  exit $SIG{TERM}
-#}
+my $ver = "v1.0";  # hell yea, new revision!
+                   # can we have a party
+                   # with lots of hookers?
+                   # bonus points for anal beads
+
 if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
@@ -81,15 +84,6 @@ while (1) {
 close(LOG);
 close(STDERR);
 
-sub checkargs {
-if ($#ARGV + 1 eq 2) {
-	return 0;
-}
-if ($#ARGV + 1 ne 2) {
-  print "Incorrect number of arguments.  SPaste takes one command line argument, the config file path!";
-  return 1;
-}
-}
 sub client    # worker
 {
   my $cl = shift;
@@ -165,11 +159,11 @@ sub purdydate {
 
 
 END {
-  unless ($SIG{TERM} || $SIG{INT} || $SIG{HUP}) {
-    print "Something unusual happened... check $logfile\n";
-  }
   if ($cfgf) {
   if (-e $pidfile) {
+  unless ($SIG{TERM} || $SIG{INT}) {
+    print "Something unusual happened... check $logfile\n";
+  }
   print LOG "Removing lockfile...\n";
   unlink($pidfile);
   }
