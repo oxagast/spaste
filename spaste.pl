@@ -26,8 +26,8 @@ STDOUT->autoflush();
 STDERR->autoflush();
 if ($#ARGV + 1 ne 2) {
   print "Incorrect number of arguments.\n Useage:\n  $ARGV[0] --conf [file]\n";
-    exit $SIG{TERM};
-   }
+  exit $SIG{TERM};
+}
 my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile);
 my $cfgf = undef;
 GetOptions('conf=s' => \$cfgf);
@@ -39,12 +39,11 @@ $certfile  = $config->{SSL}{certfile};
 $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
-$logfile   = $config->{Settings}{logfile};                                      # log
-my $ver = "v1.0";  # hell yea, new revision!
-                   # can we have a party
-                   # with lots of hookers?
-                   # bonus points for anal beads
-
+$logfile   = $config->{Settings}{logfile};    # log
+my $ver = "v1.0";                             # hell yea, new revision!
+                                              # can we have a party
+                                              # with lots of hookers?
+                                              # bonus points for anal beads
 if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
@@ -83,6 +82,7 @@ while (1) {
 }    # forever
 close(LOG);
 close(STDERR);
+
 
 sub client    # worker
 {
@@ -160,14 +160,14 @@ sub purdydate {
 
 END {
   if ($cfgf) {
-  if (-e $pidfile) {
-  unless ($SIG{TERM} || $SIG{INT}) {
-    print "Something unusual happened... check $logfile\n";
-  }
-  print LOG "Removing lockfile...\n";
-  unlink($pidfile);
-  }
-  print LOG "Stopping SPaste process cleanly...\n";
+    if (-e $pidfile) {
+      unless ($SIG{TERM} || $SIG{INT}) {
+        print "Something unusual happened... check $logfile\n";
+      }
+      print LOG "Removing lockfile...\n";
+      unlink($pidfile);
+    }
+    print LOG "Stopping SPaste process cleanly...\n";
   }
 }
 
