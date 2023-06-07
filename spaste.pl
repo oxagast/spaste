@@ -41,7 +41,10 @@ $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};                                      # log
 $SIG{TERM} = $SIG{INT} = sub { unlink($pidfile); die "Caught a sigterm $!" };
-my $ver = "v0.5";
+my $ver = "v1.0";  # hell yea, new revision!
+                   # can we have a party
+                   # with lots of hookers?
+                   # bonus points for anal beads
 
 if (-e $pidfile) {
   die
