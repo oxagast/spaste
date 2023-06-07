@@ -22,14 +22,11 @@ use threads;
 use Config::Tiny;
 use Getopt::Long qw (GetOptions);
 
-if ($#ARGV + 1 ne 2) {
-  die
-"Incorrect number of arguments.  SPaste takes one command line argument, the config file path!";
-}
+
 STDOUT->autoflush();
 STDERR->autoflush();
 my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile);
-my $cfgf;
+my $cfgf = undef;
 GetOptions('conf=s' => \$cfgf);
 my $config = Config::Tiny->read($cfgf);
 $host      = $config->{Server}{fqdn};
@@ -42,7 +39,9 @@ $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};                                      # log
 $SIG{TERM} = $SIG{INT} = sub { unlink($pidfile); die "Caught a sigterm $!" };
 my $ver = "v0.5";
-
+#if (checkargs() eq 1) {
+#  exit $SIG{TERM}
+#}
 if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
@@ -82,7 +81,15 @@ while (1) {
 close(LOG);
 close(STDERR);
 
-
+sub checkargs {
+if ($#ARGV + 1 eq 2) {
+	return 0;
+}
+if ($#ARGV + 1 ne 2) {
+  print "Incorrect number of arguments.  SPaste takes one command line argument, the config file path!";
+  return 1;
+}
+}
 sub client    # worker
 {
   my $cl = shift;
@@ -158,11 +165,15 @@ sub purdydate {
 
 
 END {
-  unless ($SIG{TERM}) {
+  unless ($SIG{TERM} || $SIG{INT} || $SIG{HUP}) {
     print "Something unusual happened... check $logfile\n";
   }
+  if ($cfgf) {
+  if (-e $pidfile) {
   print LOG "Removing lockfile...\n";
   unlink($pidfile);
+  }
   print LOG "Stopping SPaste process cleanly...\n";
+  }
 }
 
