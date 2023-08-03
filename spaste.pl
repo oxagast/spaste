@@ -10,7 +10,7 @@
 # I would suggest creating an ssl user and pastebot user for this for security reasons.
 # Set the permissions on your valid cert.pm and privkey.pem and on the directory on the
 # webserver.
-# useage: ./spaste.pl
+# useage: ./spaste.pl --conf spaste.conf
 
 use strict;
 use warnings;
