@@ -6,6 +6,4 @@ Install: `echo "alias sp='openssl s_client -verify_return_error -servername spas
 
 Useage: `echo "yes hello" | sp`
 
-Notes: This also works with ncat from the nmap package ( `ncat -ssl spaste.oxasploits.com 8888` ) if you have that installed but for some odd reason not openssl.
-
 Thanks for a bugfix, brianx!
