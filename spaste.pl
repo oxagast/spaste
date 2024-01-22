@@ -56,7 +56,9 @@ open(LOG,    '>>', $logfile) or die $!;
 LOG->autoflush();
 my $datet = purdydate();
 print LOG "$datet Starting spaste $ver using $host:$port\n";
-chdir $pasteroot or die "$datet $!";
+my $siteroot = $pasteroot;
+$siteroot =~ s|/p/$||;
+chdir "$siteroot" or die "$datet $!";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
                                LocalPort => $port,
@@ -110,6 +112,7 @@ sub client    # worker
       while (1) {
         $rndid = genuniq();
         if (!-e "$pasteroot$rndid") {
+          print $cl "$srvname/p/$rndid\n";
           writef($rndid, $recv, $cl, $logfile);
           $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
           return 0;    # return so we don't get stuck in the loop
@@ -123,9 +126,10 @@ sub client    # worker
 sub writef() {
   my ($rndid, $recv, $cl, $logfile) = @_;
   $datet = purdydate();
+
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
-  print LOG " $rndid : storing at $pasteroot/p/$rndid\n";
-  print "$rndid : storing at $pasteroot/p/$rndid\n";
+  print LOG " $rndid : storing at $pasteroot$rndid\n";
+  print "$rndid : storing at $pasteroot$rndid\n";
   $datet = purdydate();
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
@@ -134,7 +138,6 @@ sub writef() {
   open(P, '>', $filename) or die "$datet $cl->peerhost $!";
   print P $recv;
   close(P);
-  print $cl "$srvname/p/$rndid" . "\n" or die "$datet $cl->peerhost $!";
   return 1;
 }
 
