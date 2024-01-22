@@ -10,8 +10,7 @@
 # I would suggest creating an ssl user and pastebot user for this for security reasons.
 # Set the permissions on your valid cert.pm and privkey.pem and on the directory on the
 # webserver.
-# useage: ./spaste.pl
-
+# useage: ./spaste.pl --conf spaste.conf
 
 use strict;
 use warnings;
@@ -20,22 +19,46 @@ use Fcntl ("F_GETFL", "F_SETFL", "O_NONBLOCK");
 use Socket;
 use IO::Socket::SSL;
 use threads;
+use Config::Tiny;
+use Getopt::Long qw (GetOptions);
+$SIG{TERM} = $SIG{INT} = sub { die "Caught a sigterm $!" };
 STDOUT->autoflush();
 STDERR->autoflush();
-my $logfile = "/var/log/spaste.log";                  # log
-my $proot   = "/var/www/spaste.oxasploits.com/p/";    # paste root if not default
-my $host    = "spaste.oxasploits.com";                # change to your server
-my $srvname = "https://" . $host;
-my $port    = "8888";
-my $cer = "/etc/letsencrypt/live/" . $host . "/cert.pem";       # use your cert
-my $key = "/etc/letsencrypt/live/" . $host . "/privkey.pem";    # use your privkey
-my $ver = "v0.5";
+if ($#ARGV + 1 ne 2) {
+  print "Incorrect number of arguments.\n Useage:\n  $ARGV[0] --conf [file]\n";
+  exit $SIG{TERM};
+}
+my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile);
+my $cfgf = undef;
+GetOptions('conf=s' => \$cfgf);
+my $config = Config::Tiny->read($cfgf);
+$host      = $config->{Server}{fqdn};
+$srvname   = $config->{Server}{baseuri};
+$port      = $config->{Server}{listenport};
+$certfile  = $config->{SSL}{certfile};
+$keyfile   = $config->{SSL}{keyfile};
+$pidfile   = $config->{Settings}{pidfile};
+$pasteroot = $config->{Server}{pasteroot};
+$logfile   = $config->{Settings}{logfile};    # log
+my $ver = "v1.0";                             # hell yea, new revision!
+                                              # can we have a party
+                                              # with lots of hookers?
+                                              # bonus points for anal beads
+if (-e $pidfile) {
+  die
+"SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
+}
+open(PIDF, ">", $pidfile) or die $!;
+print PIDF $$ . "\n";
+close(PIDF);
 open(STDERR, ">>", $logfile) or die $!;
-open(LOG, '>>', $logfile) or die $!;
+open(LOG,    '>>', $logfile) or die $!;
 LOG->autoflush();
 my $datet = purdydate();
 print LOG "$datet Starting spaste $ver using $host:$port\n";
-chdir "/var/www/spaste.oxasploits.com/" or die "$datet $!";
+my $siteroot = $pasteroot;
+$siteroot =~ s|/p/$||;
+chdir "$siteroot" or die "$datet $!";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
                                LocalPort => $port,
@@ -43,11 +66,11 @@ my $sock = IO::Socket::IP->new(
                                ReuseAddr => 1
 ) or die "$datet $!";
 umask(022);
-my $WITH_THREADS = 1;                                           # the switch!!
+my $WITH_THREADS = 1;    # the switch!!
 
 while (1) {
   eval {
-    my $cl = $sock->accept();                                   # threaded accept
+    my $cl = $sock->accept();    # threaded accept
     if ($cl) {
       $datet = purdydate();
       my $th = threads->create(\&client, $cl) or die "$datet $!";
@@ -59,21 +82,25 @@ while (1) {
     exit(1);
   }
 }    # forever
-  close(LOG);
-  close(STDERR);
-
+close(LOG);
+close(STDERR);
 
 
 sub client    # worker
 {
   my $cl = shift;
+
   # upgrade INET socket to SSL
   $cl = IO::Socket::SSL->start_SSL(
                                    $cl,
-                                   SSL_server    => 1,
-                                   SSL_cert_file => $cer,
-                                   SSL_key_file  => $key
+                                   SSL_server          => 1,
+                                   SSL_cert_file       => $certfile,
+                                   SSL_key_file        => $keyfile,
+                                   SSL_verifycn_name   => $host,
+                                   SSL_verifycn_scheme => 'default',
+                                   SSL_hostname        => $host
   ) or die "$datet $@";
+
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
   fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
@@ -84,10 +111,11 @@ sub client    # worker
       my $rndid = "";
       while (1) {
         $rndid = genuniq();
-        if (! -e "$proot$rndid") {
+        if (!-e "$pasteroot$rndid") {
+          print $cl "$srvname/p/$rndid\n";
           writef($rndid, $recv, $cl, $logfile);
-          $cl->close() or die "$datet $cl->peerhost $!";                   # close last sock and move on
-          return 0;                       # return so we don't get stuck in the loop
+          $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
+          return 0;    # return so we don't get stuck in the loop
         }
       }
     }
@@ -98,18 +126,18 @@ sub client    # worker
 sub writef() {
   my ($rndid, $recv, $cl, $logfile) = @_;
   $datet = purdydate();
+
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
-  print LOG " $rndid : storing at $proot/p/$rndid\n";
-  print "$rndid : storing at $proot/p/$rndid\n";
+  print LOG " $rndid : storing at $pasteroot$rndid\n";
+  print "$rndid : storing at $pasteroot$rndid\n";
   $datet = purdydate();
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
-  my $filename = $proot . $rndid;
-  open(P, '>', $filename) or die "$datet $cl->peerhost $!";;
+  my $filename = $pasteroot . $rndid;
+  open(P, '>', $filename) or die "$datet $cl->peerhost $!";
   print P $recv;
   close(P);
-  print $cl "$srvname/p/$rndid" . "\n" or die "$datet $cl->peerhost $!";
   return 1;
 }
 
@@ -122,10 +150,27 @@ sub genuniq {
   return $pasid;    # push it back
 }
 
+
 sub purdydate {
 
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
-    my $datetime = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
-                                   $year+1900,$mon+1,$mday,$hour,$min,$sec);
-    return $datetime;
+  my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
+  my $datetime = sprintf("%04d%02d%02d %02d:%02d:%02d",
+                         $year + 1900,
+                         $mon + 1, $mday, $hour, $min, $sec);
+  return $datetime;
 }
+
+
+END {
+  if ($cfgf) {
+    if (-e $pidfile) {
+      unless ($SIG{TERM} || $SIG{INT}) {
+        print "Something unusual happened... check $logfile\n";
+      }
+      print LOG "Removing lockfile...\n";
+      unlink($pidfile);
+    }
+    print LOG "Stopping SPaste process cleanly...\n";
+  }
+}
+
