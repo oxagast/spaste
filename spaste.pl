@@ -56,7 +56,7 @@ open(LOG,    '>>', $logfile) or die $!;
 LOG->autoflush();
 my $datet = purdydate();
 print LOG "$datet Starting spaste $ver using $host:$port\n";
-chdir "/var/www/spaste.oxasploits.com/" or die "$datet $!";
+chdir $pasteroot or die "$datet $!";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
                                LocalPort => $port,
