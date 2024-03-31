@@ -36,3 +36,4 @@ inc/
 
 *.bak
 spaste-site/www/p/*
+*.pem
