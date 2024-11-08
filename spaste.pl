@@ -51,6 +51,7 @@ if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
 }
+my $th;
 open(PIDF, ">", $pidfile) or die $!;
 print PIDF $$ . "\n";
 close(PIDF);
@@ -76,9 +77,9 @@ while (1) {
     my $cl = $sock->accept();    # threaded accept
     if ($cl) {
       $datet = purdydate();
-      my $th = threads->create(\&client, $cl) or die "$datet $!";
-      $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
+      $th = threads->create(\&client, $cl) or die "$datet $!";
     }
+   
   };    # eval
   if ($@) {
     print STDERR "ex: $@\n";
@@ -104,22 +105,29 @@ sub client    # worker
                                    SSL_hostname        => $host
   ) or die "$datet $@";
 
+      $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
+    binmode($cl);
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
   fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-  while (1) {
-    my $ret = "";
-    $ret = $cl->read(my $recv, 50000);    # get the data
+  while (!$cl->pending()) {
+    CT:
+    my $ret;
+    $ret = $cl->read(my $recv, 4096);    # get the data
     if (defined($ret) && length($recv) > 0) {
       my $rndid = "";
-      while (1) {
+
+      #  while (1) {
         $rndid = genuniq();
         if (!-e "$pasteroot$rndid") {
           print $cl "$srvname/p/$rndid\n";
           writef($rndid, $recv, $cl, $logfile);
           $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
+          if ($cl->pending()) {
+            goto CT;
+          }
           return 0;    # return so we don't get stuck in the loop
-        }
+          # }
       }
     }
   }
