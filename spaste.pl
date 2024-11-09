@@ -27,6 +27,7 @@ use Getopt::Long qw (GetOptions);
 $SIG{TERM} = $SIG{INT} = sub { die "Caught a sigterm $!" };
 STDOUT->autoflush();
 STDERR->autoflush();
+
 if ($#ARGV + 1 ne 2) {
   print "Incorrect number of arguments.\n Useage:\n  $ARGV[0] --conf [file]\n";
   exit $SIG{TERM};
@@ -47,6 +48,7 @@ my $ver = "v1.0";                             # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
                                               # bonus points for anal beads
+
 if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
@@ -77,9 +79,8 @@ while (1) {
     my $cl = $sock->accept();    # threaded accept
     if ($cl) {
       $datet = purdydate();
-      $th = threads->create(\&client, $cl) or die "$datet $!";
+      $th    = threads->create(\&client, $cl) or die "$datet $!";
     }
-   
   };    # eval
   if ($@) {
     print STDERR "ex: $@\n";
@@ -93,7 +94,6 @@ close(STDERR);
 sub client    # worker
 {
   my $cl = shift;
-
   # upgrade INET socket to SSL
   $cl = IO::Socket::SSL->start_SSL(
                                    $cl,
@@ -105,32 +105,29 @@ sub client    # worker
                                    SSL_hostname        => $host
   ) or die "$datet $@";
 
-      $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
-    binmode($cl);
+  $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
+  binmode($cl);
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
+CT:
   fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-  while (!$cl->pending()) {
-    CT:
-    my $ret;
-    $ret = $cl->read(my $recv, 4096);    # get the data
-    if (defined($ret) && length($recv) > 0) {
-      my $rndid = "";
-
-      #  while (1) {
-        $rndid = genuniq();
-        if (!-e "$pasteroot$rndid") {
-          print $cl "$srvname/p/$rndid\n";
-          writef($rndid, $recv, $cl, $logfile);
-          $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
-          if ($cl->pending()) {
-            goto CT;
-          }
-          return 0;    # return so we don't get stuck in the loop
-          # }
+  #  while (!$cl->pending()) {
+  my ($ret, $w);
+  my $rndid = genuniq();
+  $ret = $cl->read(my $recv, 4096);    # get the data
+  $hitt++;
+  if (defined($ret) && length($recv) > 0) {
+    $w = $w . $recv;
+    if ($cl->pending) { goto CT }
+    else {
+      if (length($recv) < 4096) {    # so we only print after we've got all our data
+        writef($rndid, $w, $cl, $logfile);
+        print $cl "$srvname/p/$rndid\n";
       }
+      goto CT;
     }
   }
+  $cl->close() or die "$datet $cl->peerhost $!";    # close last sock and move on
 }
 
 
@@ -154,7 +151,7 @@ sub writef() {
 
 
 sub genuniq {
-  my $pasid;    # for unique paste identifier
+  my $pasid;        # for unique paste identifier
   my @set = ('A' .. 'Z', 'a' .. 'z', 0 .. 9);
   my $num = $#set;
   $pasid .= $set[rand($num)] for 1 .. 8;
