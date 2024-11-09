@@ -115,7 +115,6 @@ CT:
   my ($ret, $w);
   my $rndid = genuniq();
   $ret = $cl->read(my $recv, 4096);    # get the data
-  $hitt++;
   if (defined($ret) && length($recv) > 0) {
     $w = $w . $recv;
     if ($cl->pending) { goto CT }
