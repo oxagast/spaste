@@ -44,7 +44,7 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};    # log
-my $ver = "v1.0";                             # hell yea, new revision!
+my $ver = "v1.2.63";                          # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
                                               # bonus points for anal beads
