@@ -1,19 +1,20 @@
+[Unit]
 Description=SPaste Process Restart Upstart Script                                                              
 After=auditd.service systemd-user-sessions.service time-sync.target                                            
                                                                                                                
 [Service]
-#User=spaste
-PIDFile=/var/run/spaste.pid
-TimeoutStartSec=3
+User=spaste
+Group=adm
+PIDFile=/home/spaste/spaste/spaste.pid
+TimeoutStartSec=5
 Type=simple
 KillMode=process
-WorkingDirectory=/var/www/html
-ExecStart=perl /usr/local/bin/spaste.pl                                                                       
+WorkingDirectory=/var/www/spaste.oxasploits.com
+ExecStart=perl /home/spaste/spaste/spaste.pl --conf /home/spaste/spaste/spaste.conf
 Restart=always
 RestartSec=2
 LimitNOFILE=500
 ExecStop=/bin/kill -TERM $MAINPID
- 
+
 [Install]
 WantedBy=multi-user.target
-
