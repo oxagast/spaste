@@ -107,31 +107,9 @@ sub client    # worker
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
   fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-<<<<<<< HEAD
 #fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
 my $rndid = genuniq();
  my $filename = $pasteroot . $rndid;
-=======
-  while (1) {
-    my $ret = "";
-    $ret = $cl->read(my $recv, 50000);    # get the data
-    if (defined($ret) && length($recv) > 0) {
-      my $rndid = "";
-      while (1) {
-        $rndid = genuniq();
-        if (!-e "$pasteroot$rndid") {
-          print $cl "$srvname/p/$rndid\n";
-          writef($rndid, $recv, $cl, $logfile);
-          $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
-          return 0;    # return so we don't get stuck in the loop
-        }
-      }
-    }
-  }
- fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
-}
->>>>>>> 8940e356c6cdb6247eec9e8a93a78b526198c1d7
-
 
 my $data = "";
 
