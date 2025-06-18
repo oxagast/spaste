@@ -72,6 +72,7 @@ my $sock = IO::Socket::IP->new(
 ) or die "$datet $!";
 umask(022);
 my $WITH_THREADS = 1;    # the switch!!
+
 while (1) {
   eval {
     my $cl = $sock->accept();    # threaded accept
@@ -90,8 +91,7 @@ close(LOG);
 close(STDERR);
 
 
-sub server 
-{
+sub server {
   my $cl = shift;
 
   # upgrade INET socket to SSL
@@ -123,19 +123,17 @@ sub server
   open(P, '>', $filename);
   print $cl "$srvname/p/$rndid\n";
   while (my $line = $cl->getline()) {
- if ($line !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {
-    print P $line;
-
+    if ($line !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {
+      print P $line;
+    }
+    else {
+      print $cl "Error: Nonprintable chars not supported.";
+      print LOG "Error: Nonprintable chars not supported.";
+      return 1;
+    }
   }
-else {
-print $cl "Error: Nonprintable chars not supported.";
-print LOG "Error: Nonprintable chars not supported.";
-return 1;
-}
-
-}
   close(P);
-$cl->close();
+  $cl->close();
 }
 
 
