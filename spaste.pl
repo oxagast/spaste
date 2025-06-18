@@ -72,7 +72,6 @@ my $sock = IO::Socket::IP->new(
 ) or die "$datet $!";
 umask(022);
 my $WITH_THREADS = 1;    # the switch!!
-
 while (1) {
   eval {
     my $cl = $sock->accept();    # threaded accept
@@ -91,8 +90,11 @@ close(LOG);
 close(STDERR);
 
 
-sub server {
+sub server 
+{
   my $cl = shift;
+
+  # upgrade INET socket to SSL
   $cl = IO::Socket::SSL->start_SSL(
                                    $cl,
                                    SSL_server          => 1,
@@ -102,39 +104,38 @@ sub server {
                                    SSL_verifycn_scheme => 'default',
                                    SSL_hostname        => $host
   ) or die "$datet $@";
-  while ($cl->sysread(my $data, 1024)) {
 
-    # unblock
-    my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
+  # unblock
+  my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
 
-    #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-    fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
-    my $rndid    = genuniq();
-    my $filename = $pasteroot . $rndid;
-    $datet = purdydate();
-    print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
-    print LOG " $rndid : storing at $pasteroot$rndid\n";
-    print "$rndid : storing at $pasteroot$rndid\n";
-    $datet = purdydate();
-    print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
-    print LOG " $rndid : serving at $srvname/p/$rndid\n";
-    print "$rndid : serving at $srvname/p/$rndid\n";
-    open(P, '>', $filename);
-    if ($data !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {
-      print P $data;
-      print $cl "$srvname/p/$rndid\n";
-      close(P);
-      close($cl);
-      return 0;
-    }
-    else {
-      print $cl "Error: This server only accepts printable characters.\n";
-      print LOG $datet . "Nonprintable characters in stream, not supported!";
-      close(P);
-      close($cl);
-      return 1;
-    }
+  #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
+  fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
+  my $rndid    = genuniq();
+  my $filename = $pasteroot . $rndid;
+  $datet = purdydate();
+  print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
+  print LOG " $rndid : storing at $pasteroot$rndid\n";
+  print "$rndid : storing at $pasteroot$rndid\n";
+  $datet = purdydate();
+  print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
+  print LOG " $rndid : serving at $srvname/p/$rndid\n";
+  print "$rndid : serving at $srvname/p/$rndid\n";
+  open(P, '>', $filename);
+  print $cl "$srvname/p/$rndid\n";
+  while (my $line = $cl->getline()) {
+ if ($line !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {
+    print P $line;
+
   }
+else {
+print $cl "Error: Nonprintable chars not supported.";
+print LOG "Error: Nonprintable chars not supported.";
+return 1;
+}
+
+}
+  close(P);
+$cl->close();
 }
 
 
