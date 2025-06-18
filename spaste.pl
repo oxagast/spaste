@@ -27,6 +27,7 @@ use Getopt::Long qw (GetOptions);
 $SIG{TERM} = $SIG{INT} = sub { die "Caught a sigterm $!" };
 STDOUT->autoflush();
 STDERR->autoflush();
+
 if ($#ARGV + 1 ne 2) {
   print "Incorrect number of arguments.\n Useage:\n  $ARGV[0] --conf [file]\n";
   exit $SIG{TERM};
@@ -47,6 +48,7 @@ my $ver = "v1.0";                             # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
                                               # bonus points for anal beads
+
 if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
@@ -70,13 +72,12 @@ my $sock = IO::Socket::IP->new(
 ) or die "$datet $!";
 umask(022);
 my $WITH_THREADS = 1;    # the switch!!
-
 while (1) {
   eval {
     my $cl = $sock->accept();    # threaded accept
     if ($cl) {
       $datet = purdydate();
-      my $th = threads->create(\&client, $cl) or die "$datet $!";
+      my $th = threads->create(\&server, $cl) or die "$datet $!";
       $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
     }
   };    # eval
@@ -89,7 +90,7 @@ close(LOG);
 close(STDERR);
 
 
-sub client    # worker
+sub server 
 {
   my $cl = shift;
 
@@ -106,10 +107,11 @@ sub client    # worker
 
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
-#  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
-my $rndid = genuniq();
- my $filename = $pasteroot . $rndid;
+
+  #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
+  fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
+  my $rndid    = genuniq();
+  my $filename = $pasteroot . $rndid;
   $datet = purdydate();
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : storing at $pasteroot$rndid\n";
@@ -121,20 +123,19 @@ my $rndid = genuniq();
   open(P, '>', $filename);
   print $cl "$srvname/p/$rndid\n";
 
-while (my $line = $cl->getline()) {
-print P $line;
-}
+  while (my $line = $cl->getline()) {
+    print P $line;
+  }
 
   close(P);
 
   close($cl);
-return 0;
+  return 0;
 }
 
 
-
 sub genuniq {
-  my $pasid;    # for unique paste identifier
+  my $pasid;        # for unique paste identifier
   my @set = ('A' .. 'Z', 'a' .. 'z', 0 .. 9);
   my $num = $#set;
   $pasid .= $set[rand($num)] for 1 .. 8;

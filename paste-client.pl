@@ -38,7 +38,7 @@ if (@data) {
   while (my $res = <$sock>) {
     if ($res =~ m|https://.*/p/.*|) {
       print $res;
-  close($sock);
+      close($sock);
 
     }
     else {
