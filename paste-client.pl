@@ -44,7 +44,7 @@ if (@data) {
       exit 1;
     }
   }
-  close($sock);
+  sclose($sock);
   exit 0;
 }
 else {

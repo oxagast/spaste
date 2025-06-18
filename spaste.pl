@@ -123,6 +123,7 @@ sub client    # worker
       }
     }
   }
+ fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
 }
 
 
