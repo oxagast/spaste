@@ -38,13 +38,14 @@ if (@data) {
   while (my $res = <$sock>) {
     if ($res =~ m|https://.*/p/.*|) {
       print $res;
+  close($sock);
+
     }
     else {
       print STDERR "Error: This doesn't look like an spaste server!\n";
       exit 1;
     }
   }
-  sclose($sock);
   exit 0;
 }
 else {
