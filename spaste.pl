@@ -106,13 +106,10 @@ sub client    # worker
 
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
-  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-#fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
+#  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
+fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
 my $rndid = genuniq();
  my $filename = $pasteroot . $rndid;
-
-my $data = "";
-
   $datet = purdydate();
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : storing at $pasteroot$rndid\n";
@@ -121,12 +118,13 @@ my $data = "";
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
-  print $cl "$srvname/p/$rndid\n";
   open(P, '>', $filename);
+  print $cl "$srvname/p/$rndid\n";
 
 while (my $line = $cl->getline()) {
 print P $line;
 }
+
   close(P);
 
   close($cl);
