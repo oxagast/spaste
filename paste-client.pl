@@ -1,4 +1,17 @@
 #!/usr/bin/perl
+
+#
+#   __ _  _  __   ___  __  ____ ____
+#  /  ( \/ )/ _\ / __)/ _\/ ___(_  _)
+# (  O )  (/    ( (_ /    \___ \ )(
+#  \__(_/\_\_/\_/\___\_/\_(____/(__)
+#
+# By oxagast, thanks to termbin.org creators for the idea.
+#
+# Babe! Let me lick your butthole!
+#
+# usage: cat /etc/passwd | perl paste-client.pl
+
 use strict;
 use warnings;
 use IO::Socket::SSL;
@@ -39,8 +52,8 @@ if (@data) {
   while (my $res = <$sock>) {
     if ($res =~ m|https://.*/p/.*|) {
       print $res;
-  close($sock);
-    exit 0;
+      $sock->close();
+      exit 0;
     }
     else {
       print STDERR "Error: This doesn't look like an spaste server!\n";
