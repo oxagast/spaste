@@ -107,7 +107,6 @@ sub server
 
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
-
   #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
   fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
   my $rndid    = genuniq();
@@ -122,13 +121,10 @@ sub server
   print "$rndid : serving at $srvname/p/$rndid\n";
   open(P, '>', $filename);
   print $cl "$srvname/p/$rndid\n";
-
   while (my $line = $cl->getline()) {
     print P $line;
   }
-
   close(P);
-
   close($cl);
   return 0;
 }
