@@ -134,6 +134,7 @@ sub server {
   }
   close(P);
   $cl->close();
+  return 0;
 }
 
 
