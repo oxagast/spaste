@@ -107,29 +107,14 @@ sub client    # worker
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
   fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
-  while (1) {
-    my $ret = "";
-    $ret = $cl->read(my $recv, 50000);    # get the data
-    if (defined($ret) && length($recv) > 0) {
-      my $rndid = "";
-      while (1) {
-        $rndid = genuniq();
-        if (!-e "$pasteroot$rndid") {
-          print $cl "$srvname/p/$rndid\n";
-          writef($rndid, $recv, $cl, $logfile);
-          $cl->close() or die "$datet $cl->peerhost $!";   # close last sock and move on
-          return 0;    # return so we don't get stuck in the loop
-        }
-      }
-    }
-  }
-}
+#fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
+my $rndid = genuniq();
+ my $filename = $pasteroot . $rndid;
 
 
-sub writef() {
-  my ($rndid, $recv, $cl, $logfile) = @_;
+my $data = "";
+
   $datet = purdydate();
-
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : storing at $pasteroot$rndid\n";
   print "$rndid : storing at $pasteroot$rndid\n";
@@ -137,12 +122,18 @@ sub writef() {
   print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
-  my $filename = $pasteroot . $rndid;
-  open(P, '>', $filename) or die "$datet $cl->peerhost $!";
-  print P $recv;
-  close(P);
-  return 1;
+  print $cl "$srvname/p/$rndid\n";
+  open(P, '>', $filename);
+
+while (my $line = $cl->getline()) {
+print P $line;
 }
+  close(P);
+
+  close($cl);
+return 0;
+}
+
 
 
 sub genuniq {
