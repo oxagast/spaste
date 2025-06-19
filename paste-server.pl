@@ -127,7 +127,7 @@ sub server {
       print P $line;
     }
     else {
-      $datet  purdydate();
+      $datet = purdydate();
       print $cl $datet . " " . "Error: Nonprintable chars not supported.";
       print LOG "Error: Nonprintable chars not supported.";
       unlink($filename);
