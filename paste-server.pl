@@ -13,7 +13,7 @@
 #
 # Babe! Let me lick your butthole!
 #
-# useage: ./spaste.pl --conf spaste.conf
+# useage: ./paste-server.pl --conf spaste.conf
 
 use strict;
 use warnings;
@@ -44,7 +44,7 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};    # log
-my $ver = "v1.0";                             # hell yea, new revision!
+my $ver = "v1.1";                             # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
                                               # bonus points for anal beads
@@ -128,8 +128,8 @@ sub server {
     }
     else {
       $datet = purdydate();
-      print $cl $datet . " " . "Error: Nonprintable chars not supported.";
-      print LOG "Error: Nonprintable chars not supported.";
+      print $cl "Error: Nonprintable chars not supported.";
+      print LOG $datet . " " . "Error: Nonprintable chars not supported.";
       unlink($filename);
       return 1;
     }
