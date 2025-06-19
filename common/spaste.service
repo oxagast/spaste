@@ -5,12 +5,12 @@ After=auditd.service systemd-user-sessions.service time-sync.target
 [Service]
 User=spaste
 Group=adm
-PIDFile=/home/spaste/spaste/spaste.pid
+PIDFile=/home/spaste/spaste/run/spaste.pid
 TimeoutStartSec=5
 Type=simple
 KillMode=process
 WorkingDirectory=/var/www/spaste.oxasploits.com
-ExecStart=perl /home/spaste/spaste/spaste.pl --conf /home/spaste/spaste/spaste.conf
+ExecStart=perl /home/spaste/spaste/bin/paste-server.pl --conf /home/spaste/spaste/config/spaste.conf
 Restart=always
 RestartSec=2
 LimitNOFILE=500
