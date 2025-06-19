@@ -123,7 +123,7 @@ sub server {
   open(P, '>', $filename);
   print $cl "$srvname/p/$rndid\n";
   while (my $line = $cl->getline()) {             # i can make getline work like this
-    if ($line !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {   # non printable chars
+    if ($line !~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {   # non printable chars
       print P $line;
     }
     else {
