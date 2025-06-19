@@ -24,6 +24,24 @@ a:link {
   text-decoration: none;
 }
 
+cursor {
+  display: hidden;
+}
+
+.blink_me {
+  animation: blinker 1s step-start infinite;
+  position: relative;
+  left: 330px;
+  top: -26px;
+  
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 a:visited {
   color: black;
   background-color: transparent;
@@ -85,6 +103,14 @@ body {
   #content {
     min-width: 180vmin; } }
 sass/white.scss
+
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 </style>
 </head><body><div id="content" width="100%">
     <span id="ps1_01"></span> <span id="cd"></span> <br>
@@ -93,7 +119,11 @@ sass/white.scss
 <span id="ps1_03"></span> <span id="tree"></span> <br>
 <span id="std_out_02"></span> <br>
 <span id="ps1_04"></span>
+
+<div class="blink_me" id="cursor">&#x2588;</div>
+
 <script type="text/javascript">
+
     async function typewriter(text, elementId, waitAfter) {
         var n = 0,
             isTag = false
@@ -140,7 +170,19 @@ sass/white.scss
         return;
     }
     typeeffetct()
+
+
+function cur() {
+                document.getElementById('cursor').style.visibility = 'hidden';
+                setTimeout(function () {
+                    document.getElementById('cursor').style.visibility = 'visible';
+                    document.getElementById('cursor').style.visibility = 'visible';
+                }, 6000);
+        }
+
+cur();
 </script>
+
 	</div></div>
 	<div><br><br><br><br><br><h4><font color="000000"><a href="https://oxasploits.com">oxasploits.com</a></h4></div>
 
