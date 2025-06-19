@@ -57,6 +57,7 @@ if (@data) {
     }
     else {
       print STDERR "Error: This doesn't look like an spaste server!\n";
+      $sock->close();
       exit 1;
     }
   }
