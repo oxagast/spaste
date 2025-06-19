@@ -108,7 +108,7 @@ sub server {
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
 
-  #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";
+  #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";  # nonblocking code ended with half docs
   fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
   my $rndid    = genuniq();
   my $filename = $pasteroot . $rndid;
@@ -122,18 +122,19 @@ sub server {
   print "$rndid : serving at $srvname/p/$rndid\n";
   open(P, '>', $filename);
   print $cl "$srvname/p/$rndid\n";
-  while (my $line = $cl->getline()) {
-    if ($line !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {
+  while (my $line = $cl->getline()) {             # i can make getline work like this
+    if ($line !~ m/[\x00\x0E-\x16\x7F-\xFF]/) {   # non printable chars
       print P $line;
     }
     else {
       print $cl "Error: Nonprintable chars not supported.";
       print LOG "Error: Nonprintable chars not supported.";
+      unlink($filename);
       return 1;
     }
   }
   close(P);
-  $cl->close();
+  $cl->close();  # needs to be closed out way out here to avoid cutting document short
   return 0;
 }
 
