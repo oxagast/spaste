@@ -56,7 +56,7 @@ if (@data) {
       exit 0;
     }
     else {
-      print STDERR "Error: This doesn't look like an spaste server!\n";
+      print STDERR "Error, invalid characters in string or not an spaste server!\n";
       $sock->close();
       exit 1;
     }
