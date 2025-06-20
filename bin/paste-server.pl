@@ -121,7 +121,6 @@ sub server {
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
   open(P, '>', $filename);
-  print $cl "$srvname/p/$rndid\n";
   while (my $line = $cl->getline()) {             # i can make getline work like this
     if ($line !~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {   # non printable chars
       print P $line;
@@ -133,7 +132,10 @@ sub server {
       unlink($filename);
       return 1;
     }
+  print $cl "$srvname/p/$rndid\n";
+
   }
+
   close(P);
   $cl->close();  # needs to be closed out way out here to avoid cutting document short
   return 0;
