@@ -41,51 +41,30 @@ if (@data) {
   my $sock = IO::Socket::SSL->new(
                                   PeerAddr            => "$host:$port",
                                   Proto               => 'tcp',
-                                  SSL_verify_mode     => SSL_VERIFY_PEER,
+              #                    SSL_verify_mode     => SSL_VERIFY_PEER,
                                   SSL_verifycn_name   => $host,
                                   SSL_hostname        => $host,
                                   SLL_verifycn_scheme => 'http',
                                   Timeout             => '8'
-  ) or die "Error: 0x03 Creation of socket: $!";
+  ) or die "Error: Creation of socket: $!";
   print $sock @data;
   print $sock "\n";
-  my @out;
   while (my $res = <$sock>) {
-    my $count;
-    $count++;
-    if (($res =~ m|https://.*/p/.*|) || ($res =~ m/^Error/)) {
-      push(@out, $res);
+    if ($res =~ m|https://.*/p/.*|) {
+      print $res;
+      $sock->close();
+      exit 0;
     }
     else {
-      if ($res =~ m/^0x/) {
-        print STDERR "Error: $res\n";
-      }
-      else {
-      print STDERR "Error: 0x01 Maybe not an spaste server?\n";
-      }
-
+      print STDERR "Error: This doesn't look like an spaste server!\n";
       $sock->close();
       exit 1;
     }
-  if ($count == 2) {
-    $sock->close();
   }
-  }
-  if ($out[1] =~ m/Error:/) {
-    print $out[1] . "\n";
-    $sock->close();
-    exit 1;
-  }
-  else {
-    print $out[0];
-    $sock->close();
-    exit 0;
-  }
-      $sock->close();
   exit 0;
 }
 else {
-  print STDERR "Error: 0x04 You should add your paste data to stdin.\n";
+  print STDERR "Error: You should add your paste data to stdin.\n";
   print STDERR "Usage:\n  echo abc | $0 --server oxasploits.com --port 8888\n";
   exit 1;
 }
