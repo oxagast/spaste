@@ -145,8 +145,7 @@ sub server {
 sub genuniq {
   my $pasid;        # for unique paste identifier
   my @set = ('A' .. 'Z', 'a' .. 'z', 0 .. 9);
-  my $num = $#set;
-  $pasid .= $set[rand($num)] for 1 .. 8;
+  $pasid .= $set[rand($#set)] for 1 .. 8;
   return $pasid;    # push it back
 }
 
