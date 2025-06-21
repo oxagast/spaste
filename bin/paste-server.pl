@@ -32,7 +32,7 @@ if ($#ARGV + 1 ne 2) {
   print "Incorrect number of arguments.\n Useage:\n  $ARGV[0] --conf [file]\n";
   exit $SIG{TERM};
 }
-my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile, $fake);
+my ($logfile, $pasteroot, $host, $srvname, $port, $certfile, $keyfile, $pidfile);
 my $cfgf = undef;
 GetOptions('conf=s' => \$cfgf);
 my $config = Config::Tiny->read($cfgf);
@@ -44,7 +44,6 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};    # log
-$fake      = $config->{SSL}{fake};
 my $ver = "v1.1";                             # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
@@ -60,25 +59,27 @@ close(PIDF);
 open(STDERR, ">>", $logfile) or die $!;
 open(LOG,    '>>', $logfile) or die $!;
 LOG->autoflush();
-print LOG purdydate() . " Starting spaste $ver using $host:$port\n";
+my $datet = purdydate();
+print LOG "$datet Starting spaste $ver using $host:$port\n";
 my $siteroot = $pasteroot;
 $siteroot =~ s|/p/$||;
-chdir "$siteroot" or die purdydate() . " $!";
+chdir "$siteroot" or die "$datet $!";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
                                LocalPort => $port,
                                Blocking  => 1,
                                ReuseAddr => 1
-) or die purdydate() . " $!";
+) or die "$datet $!";
 umask(022);
 my $WITH_THREADS = 1;    # the switch!!
 
-while () {
+while (1) {
   eval {
     my $cl = $sock->accept();    # threaded accept
     if ($cl) {
-      my $th = threads->create(\&server, $cl) or die purdydate() . " $!";
-      $th->detach() or print LOG purdydate() . " Thread detach request failed. $!\n";
+      $datet = purdydate();
+      my $th = threads->create(\&server, $cl) or die "$datet $!";
+      $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
     }
   };    # eval
   if ($@) {
@@ -102,18 +103,21 @@ sub server {
                                    SSL_verifycn_name   => $host,
                                    SSL_verifycn_scheme => 'default',
                                    SSL_hostname        => $host
-  ) or die purdydate() . " $@";
+  ) or die "$datet $@";
+
   # unblock
-  my $flags = fcntl($cl, F_GETFL, 0) or die purdydate() . " $cl->peerhost $!";
+  my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
 
   #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";  # nonblocking code ended with half docs
-  fcntl($cl, F_SETFL, $flags) or die purdydate() . " $cl->peerhost $!";
+  fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
   my $rndid    = genuniq();
   my $filename = $pasteroot . $rndid;
-  print LOG purdydate() . " " . $cl->peerhost . "/" . $cl->peerport;
+  $datet = purdydate();
+  print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : storing at $pasteroot$rndid\n";
   print "$rndid : storing at $pasteroot$rndid\n";
-  print LOG purdydate() . " " . $cl->peerhost . "/" . $cl->peerport;
+  $datet = purdydate();
+  print LOG $datet . " " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
   open(P, '>', $filename);
@@ -122,13 +126,16 @@ sub server {
       print P $line;
     }
     else {
-      print $cl "Error: Nonprintable chars not supported.";
-      print LOG purdydate() . " " . "Error: Nonprintable chars not supported.";
+      $datet = purdydate();
+      print $cl "0x02 Nonprintable chars not supported.";
+      print LOG $datet . " " . "Nonprintable chars not supported.";
       unlink($filename);
       return 1;
     }
   print $cl "$srvname/p/$rndid\n";
+
   }
+
   close(P);
   $cl->close();  # needs to be closed out way out here to avoid cutting document short
   return 0;
@@ -138,8 +145,7 @@ sub server {
 sub genuniq {
   my $pasid;        # for unique paste identifier
   my @set = ('A' .. 'Z', 'a' .. 'z', 0 .. 9);
-  my $num = $#set;
-  $pasid .= $set[rand($num)] for 1 .. 8;
+  $pasid .= $set[rand($#set)] for 1 .. 8;
   return $pasid;    # push it back
 }
 
