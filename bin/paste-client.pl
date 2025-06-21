@@ -49,11 +49,12 @@ if (@data) {
   ) or die "Error: 0x03 Creation of socket: $!";
   print $sock @data;
   print $sock "\n";
+  my @out;
   while (my $res = <$sock>) {
-    if ($res =~ m|https://.*/p/.*|) {
-      print $res;
-      $sock->close();
-      exit 0;
+    my $count;
+    $count++;
+    if (($res =~ m|https://.*/p/.*|) || ($res =~ m/^Error/)) {
+      push(@out, $res);
     }
     else {
       if ($res =~ m/^0x/) {
@@ -66,7 +67,21 @@ if (@data) {
       $sock->close();
       exit 1;
     }
+  if ($count == 2) {
+    $sock->close();
   }
+  }
+  if ($out[1] =~ m/Error:/) {
+    print $out[1] . "\n";
+    $sock->close();
+    exit 1;
+  }
+  else {
+    print $out[0];
+    $sock->close();
+    exit 0;
+  }
+      $sock->close();
   exit 0;
 }
 else {
