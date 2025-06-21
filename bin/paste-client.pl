@@ -16,12 +16,13 @@ use strict;
 use warnings;
 use IO::Socket::SSL;
 use Getopt::Long;
-
+my $verify = "true";
 my %options;
 GetOptions(
            'server=s' => \$options{server},
            'port=i'   => \$options{port},
-           'help'     => \$options{help}
+           'help'     => \$options{help},
+           'noverify'  => \$options{noverify}
 );
 if ($options{help}) {
   print STDERR "Usage: echo abc | $0 --server oxasploits.com --port 8888\n";
@@ -38,28 +39,31 @@ if (@data) {
   if ($options{port}) {
     $port = $options{port};
   }
+  
   my $sock = IO::Socket::SSL->new(
                                   PeerAddr            => "$host:$port",
                                   Proto               => 'tcp',
-              #                    SSL_verify_mode     => SSL_VERIFY_PEER,
+                                  SSL_verify_mode     => SSL_VERIFY_PEER,
                                   SSL_verifycn_name   => $host,
                                   SSL_hostname        => $host,
-                                  SLL_verifycn_scheme => 'http',
+                                  SSL_verifycn_scheme => 'http',
                                   Timeout             => '8'
   ) or die "Error: Creation of socket: $!";
   print $sock @data;
+  my @out;
+  my $count = 0;
   print $sock "\n";
   while (my $res = <$sock>) {
-    if ($res =~ m|https://.*/p/.*|) {
-      print $res;
-      $sock->close();
-      exit 0;
+    $count++;
+    if (($res =~ m|https://.*/p/.*|) || ($res =~ m|^0x|)) {
+      push(@out, $res);
+      if ($count == 2) {$sock->close(); exit 1}
     }
     else {
       print STDERR "Error: This doesn't look like an spaste server!\n";
-      $sock->close();
       exit 1;
     }
+  print $out[0];
   }
   exit 0;
 }
