@@ -53,6 +53,9 @@ if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
 }
+if ($srvname =~ m|http:|) {
+  print STDERR "The baseuri should not be http! Only use a properly configured https server with a fqdn here!\n";
+}
 open(PIDF, ">", $pidfile) or die $!;
 print PIDF $$ . "\n";
 close(PIDF);
@@ -106,8 +109,7 @@ sub server {
   ) or die "$datet $@";
 
   # unblock
-  my $flags = fcntl($cl, F_GETFL, 0) or die "$datet $cl->peerhost $!";
-
+  my $flags = fcntl($cl, F_GETFL, 0) or die purdydate() . " $cl->peerhost $!";
   #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";  # nonblocking code ended with half docs
   fcntl($cl, F_SETFL, $flags) or die "$datet $cl->peerhost $!";
   my $rndid    = genuniq();
@@ -121,19 +123,23 @@ sub server {
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print "$rndid : serving at $srvname/p/$rndid\n";
   open(P, '>', $filename);
+  my $switch = 0;
   while (my $line = $cl->getline()) {             # i can make getline work like this
     if ($line !~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {   # non printable chars
       print P $line;
     }
     else {
-      $datet = purdydate();
-      print $cl "0x02 Nonprintable chars not supported.";
-      print LOG $datet . " " . "Nonprintable chars not supported.";
+      print $cl "Error: Nonprintable chars not supported.\n";
+      print LOG purdydate() . " " . "Error: Nonprintable chars not supported.\n";
       unlink($filename);
+      $cl->close();
       return 1;
     }
+    if ($switch == 0) {
   print $cl "$srvname/p/$rndid\n";
-
+ #$cl->close();
+  $switch = 1;
+  }
   }
 
   close(P);

@@ -65,7 +65,7 @@ if (@data) {
       exit 1;
     }
     if ($out =~ m|^0x|) { 
-      print STDERR "Error: " . $out . "\n" 
+      print STDERR "Error: " . $out; 
     }
     else {
       print $out;
