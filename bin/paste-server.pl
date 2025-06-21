@@ -44,7 +44,6 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};    # log
-$fake      = $config->{SSL}{fake};
 my $ver = "v1.1";                             # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
@@ -53,6 +52,9 @@ my $ver = "v1.1";                             # hell yea, new revision!
 if (-e $pidfile) {
   die
 "SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
+}
+if ($srvname =~ m|http:|) {
+  print STDERR "The baseuri should not be http! Only use a properly configured https server with a fqdn here!\n";
 }
 open(PIDF, ">", $pidfile) or die $!;
 print PIDF $$ . "\n";
@@ -104,6 +106,7 @@ sub server {
                                    SSL_hostname        => $host
   ) or die purdydate() . " $@";
   # unblock
+  
   my $flags = fcntl($cl, F_GETFL, 0) or die purdydate() . " $cl->peerhost $!";
 
   #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";  # nonblocking code ended with half docs
