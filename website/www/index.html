@@ -30,10 +30,9 @@ cursor {
 
 .blink_me {
   animation: blinker 1s step-start infinite;
-  position: relative;
-  left: 330px;
-  top: -26px;
-  
+  position: absolute;
+  left: 19em;
+  top: 21em;
 }
 
 @keyframes blinker {
@@ -112,15 +111,23 @@ sass/white.scss
 }
 
 </style>
-</head><body><div id="content" width="100%">
+</head><body>
+
+
+<div id="content" width="100%">
     <span id="ps1_01"></span> <span id="cd"></span> <br>
 <span id="ps1_02"></span> <span id="cat"></span> <br>
 <span id="std_out_01"></span> <br>
 <span id="ps1_03"></span> <span id="tree"></span> <br>
-<span id="std_out_02"></span> <br>
-<span id="ps1_04"></span>
+<span id="std_out_02">
 
+</span> 
+
+<br>
+
+<span id="ps1_04"></span>
 <div class="blink_me" id="cursor">&#x2588;</div>
+
 
 <script type="text/javascript">
 
@@ -183,7 +190,9 @@ function cur() {
 cur();
 </script>
 
-	</div></div>
+	</div>
+
+</div>
 	<div><br><br><br><br><br><h4><font color="000000"><a href="https://oxasploits.com">oxasploits.com</a></h4></div>
 
 </body>
