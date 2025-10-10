@@ -26,14 +26,14 @@ GetOptions(
 );
 
 if ($options{help}) {
-  print STDERR "Usage: echo abc | $0 --server oxasploits.com --port 8888\n";
+  print STDERR "Usage: echo abc | $0 --server oxasploits.com --port 8866\n";
   exit 1;
 }
 STDIN->blocking(0);
 my @data = <STDIN>;
 if (@data) {
   my $host = 'spaste.oxasploits.com';
-  my $port = 8888;
+  my $port = 8866;
   if ($options{server}) {
     $host = $options{server};
   }
@@ -51,32 +51,30 @@ if (@data) {
                                   Timeout             => '8'
   ) or die "Error: Creation of socket: $!";
   print $sock @data;
-  my $out;
   my $count = 0;
   print $sock "\n";
-  while (my $res = <$sock>) {
-    $count++;
-    if (($res =~ m|https://.*/p/.*|) || ($res =~ m|^0x|)) {
-      $out = $res;
-      if ($count == 2) { $sock->close(); exit 1 }
+  while(my $res = <$sock>) {
+      if (($res =~ m|https://.*/p/.*|) || ($res =~ m/0x/)) {
+      
+      print $res;
+      exit 0;
+      if ($count == 2) { $sock->close(); exit 0 }
     }
+    # elsif($res =~ m|<<END>>|) {
+    #    $sock->close();
+    #    exit 0;
+    #}
+    #  elsif($res =~ m|^0x|) {
+    #    print $res;
+    #exit 1;
+    #}
     else {
       print STDERR "Error: This doesn't look like an spaste server!\n";
       exit 1;
     }
-    if ($out =~ m|^0x|) { 
-      print STDERR "Error: " . $out; 
-    }
-    else {
-      print $out;
-      $sock->close();
-      exit 0;
-    }
-  }
-  exit 0;
 }
-else {
+if (!defined $_) {
   print STDERR "Error: You should add your paste data to stdin.\n";
   print STDERR "Usage:\n  echo abc | $0 --server oxasploits.com --port 8888\n";
   exit 1;
-}
+}}

@@ -51,10 +51,10 @@ my $ver = "v1.1";                             # hell yea, new revision!
 
 if (-e $pidfile) {
   die
-"SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
+"0x07 Error: SPaste is already running or the lockfile didn't get wiped!  If you are sure it is not running, remove $pidfile";
 }
 if ($srvname =~ m|http:|) {
-  print STDERR "The baseuri should not be http! Only use a properly configured https server with a fqdn here!\n";
+  print STDERR "0x09 Error: The baseuri should not be http! Only use a properly configured https server with a fqdn here!\n";
 }
 open(PIDF, ">", $pidfile) or die $!;
 print PIDF $$ . "\n";
@@ -72,21 +72,20 @@ my $sock = IO::Socket::IP->new(
                                LocalPort => $port,
                                Blocking  => 1,
                                ReuseAddr => 1
-) or die "$datet $!";
+) or die "0x08 Error: $datet $!";
 umask(022);
 my $WITH_THREADS = 1;    # the switch!!
-
 while (1) {
   eval {
     my $cl = $sock->accept();    # threaded accept
     if ($cl) {
       $datet = purdydate();
-      my $th = threads->create(\&server, $cl) or die "$datet $!";
-      $th->detach() or print LOG "$datet Thread detach request failed. $!\n";
+      my $th = threads->create(\&server, $cl) or die "$datet 0x06 Error: $!";
+      $th->detach() or print LOG "$datet 0x05 Error: Thread detach request failed. $!\n";
     }
   };    # eval
   if ($@) {
-    print STDERR "ex: $@\n";
+    print STDERR "0x04 Error: $@\n";
     exit(1);
   }
 }    # forever
@@ -96,8 +95,8 @@ close(STDERR);
 
 sub server {
   my $cl = shift;
-
   # upgrade INET socket to SSL
+  $datet = purdydate();
   $cl = IO::Socket::SSL->start_SSL(
                                    $cl,
                                    SSL_server          => 1,
@@ -106,8 +105,7 @@ sub server {
                                    SSL_verifycn_name   => $host,
                                    SSL_verifycn_scheme => 'default',
                                    SSL_hostname        => $host
-  ) or die "$datet $@";
-
+  ) or die "$datet 0x06 Error: $@";
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or die purdydate() . " $cl->peerhost $!";
   #  fcntl($cl, F_SETFL, $flags | O_NONBLOCK) or die "$datet $cl->peerhost $!";  # nonblocking code ended with half docs
@@ -125,24 +123,29 @@ sub server {
   open(P, '>', $filename);
   my $switch = 0;
   while (my $line = $cl->getline()) {             # i can make getline work like this
-    if ($line !~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {   # non printable chars
-      print P $line;
-    }
-    else {
-      print $cl "Error: Nonprintable chars not supported.\n";
-      print LOG purdydate() . " " . "Error: Nonprintable chars not supported.\n";
+    if ($line =~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {   # non printable chars
+      print $cl "0x03 Error: Nonprintable chars not supported.";
+      print LOG purdydate() . " " . "0x03 Error: Nonprintable chars not supported.\n";
       unlink($filename);
       $cl->close();
       return 1;
     }
-    if ($switch == 0) {
-  print $cl "$srvname/p/$rndid\n";
- #$cl->close();
+    else {
+      print P $line;
+    }
+if ($switch == 0) {
   $switch = 1;
-  }
-  }
+  print $cl "$srvname/p/$rndid\n";
+  print $cl "<<END>>\n\n";
+  # $cl->close();
+}
+}
+#$cl->close();
+#}
+  #  }
+  
 
-  close(P);
+close(P);
   $cl->close();  # needs to be closed out way out here to avoid cutting document short
   return 0;
 }
@@ -170,7 +173,7 @@ END {
   if ($cfgf) {
     if (-e $pidfile) {
       unless ($SIG{TERM} || $SIG{INT}) {
-        print "Something unusual happened... check $logfile\n";
+        print STDERR "$datet 0x02 Error: Something unusual happened... check $logfile\n";
       }
       print LOG "Removing lockfile...\n";
       unlink($pidfile);
