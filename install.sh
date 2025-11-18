@@ -12,52 +12,71 @@ if ! command -v "perl" 2>&1 >/dev/null && ! command -v "openssl" 2>&1 >/dev/null
   exit 1
 fi
 
-SPSTR=YWxpYXMgc3A9InRpbWVvdXQgMXMgb3BlbnNzbCBzX2NsaWVudCAtcXVpZXQgLXNlcnZlcm5hbWUgc3Bhc3RlLm94YXNwbG9pdHMuY29tIC12ZXJpZnlfcmV0dXJuX2Vycm9yIC1jb25uZWN0IHNwYXN0ZS5veGFzcGxvaXRzLmNvbTo4ODY2IDI+L2Rldi9udWxsIHwgZ3JlcCAtdiBFTkQgfCB0ciAtZCAnXG4nOyBlY2hvIgo=
+SPSTR="alias sp='timeout 1s openssl s_client -quiet -servername spaste.oxasploits.com \
+  -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v END |\
+  tr -d \"\n\"; echo'"
 SHF=""
 
 isinst()
 {
-  if [[ $(cat $SHF | grep -c "alias sp=") -gt 0 ]]; then
-    echo "SPaste seems to be already installed!"
-    exit 1
+  if [[ "$1" != "upgrade" ]]; then
+    if [[ $(cat $SHF | grep -c "alias sp=") -gt 0 ]]; then
+      echo "SPaste seems to be already installed!"
+      exit 1
+    fi
+    if [[ -x "$HOME/.local/bin/sp" ]]; then
+      echo "Spaste seems to be already installed!"
+      exit 1
+    fi
   fi
 }
 
 installo()
 {
-  echo $SPSTR | base64 -d >>$SHF
-  echo "Sucessfully installed!"
+  if [[ -w "${SHF}" ]]; then
+    echo $SPSTR >>$SHF
+    echo "Sucessfully installed!"
+    echo "To complete the install, please run:  source ${SHF}"
+    exit 0
+  else
+    return 1
+  fi
 }
 
 installp()
 {
-  mkdir -p $HOME/.local/bin
-  cp bin/spaste-client.pl $HOME/.local/bin && echo "Installed perl script locally!"
+  echo "Installing perl client..."
+  if mkdir -p $HOME/.local/bin; then
+    if cp bin/paste-client.pl $HOME/.local/bin/sp; then
+      chmod +x $HOME/.local/bin/sp
+      echo "Installed perl script locally!"
+      echo "Please make sure ~/.local/bin is in your \$PATH."
+    else
+      echo "Could not install script in local bin dir!"
+    fi
+  else
+    echo "Could not create dir for script!"
+  fi
+
   exit 0
 }
 
 if command -v "openssl" 2>&1 >/dev/null; then
   if [[ $(ps -p $PPID | grep -v CMD | awk '{print $NF}') == "bash" ]]; then
     SHF="$HOME/.bashrc"
-    isinst
-    installo
+    isinst $1
+    installo || installp
   elif [[ $(ps -p $PPID | grep -v CMD | awk '{print $NF}') == "zsh" ]]; then
     SHF="$HOME/.zshrc"
-    isinst
-    installo
+    isinst $1
+    installo || installp
   elif [[ $(ps -p $PPID | grep -v CMD | awk '{print $NF}') == "sh" ]]; then
     SHF="$HOME/.profile"
-    isinst
-    installo
+    isinst $1
+    installo || installp
   else
-    echo "Couldn't detect shell, falling back to installing perl client in $HOME/.local/bin/!"
-    installp
-    echo "Unable to install!" && exit 1
+    echo "Couldn't detect shell, falling back to perl client!" && installp
   fi
 else
-  echo "Didn't find openssl, falling back to installing perl client in $HOME/.local/bin/!"
-  installp
-  echo "Unable to install!" && exit 1
-  echo "To complete the install, please run:  source ${SHF}"
-  exit 0
+  echo "Didn't find openssl, falling back to perl client!" && installp
 fi
