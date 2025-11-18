@@ -1,16 +1,16 @@
-#Spaste
-##A pure perl SSL encrypted port of [termbin.com](https://github.com/solusipse/fiche).
+# Spaste
+## A pure perl SSL encrypted port of [termbin.com](https://github.com/solusipse/fiche).
 
-###Notes
+### Notes
 For the server I suggest adding an ssl group and spaste user, the systemd startup/respawn script if its a dedicated setup, and the crontab entry that removes expired pastes, for security purposes.
 
-###Deps
+### Deps
 openssl or perl
 
-###Install
+### Install
 To install, run `install.sh`
 
-###Use
+### Use
 Useage: `echo "yes hello" | sp`
 
 ### Thanks
