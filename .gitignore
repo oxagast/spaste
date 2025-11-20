@@ -1,3 +1,5 @@
+keys/*
+*.pl.tdy
 *.pid
 !Build/
 .last_cover_stats

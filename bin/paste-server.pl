@@ -45,7 +45,7 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};    # log
-my $ver = "v1.2.1";                           # hell yea, new revision!
+my $ver = "v1.2.2";                           # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
                                               # bonus points for anal beads
@@ -63,27 +63,25 @@ close(PIDF);
 open(STDERR, ">>", $logfile) or die $!;
 open(LOG,    '>>', $logfile) or die $!;
 LOG->autoflush();
-my $datet = purdydate();
-print LOG "$datet 0x00 Starting spaste $ver using $host:$port\n";
+print LOG purdydate() . " 0x00 Starting spaste $ver using $host:$port\n";
 my $siteroot = $pasteroot;
 $siteroot =~ s|/p/$||;
-chdir "$siteroot" or die "$datet 0x0A $!";
+chdir "$siteroot" or die purdydate() . " 0x0A $!";
 my $sock = IO::Socket::IP->new(
   Listen    => SOMAXCONN,
   LocalPort => $port,
   Blocking  => 1,
   ReuseAddr => 1)
-  or print LOG "0x08 Error: $datet $!";
+  or print LOG "0x08 Error: " . prudydate() . " $!";
 umask(022);
 my $WITH_THREADS = 1;    # the switch!!
 while (1) {
   eval {
     my $cl = $sock->accept();    # threaded accept
     if ($cl) {
-      $datet = purdydate();
-      my $th = threads->create(\&server, $cl) or print LOG "$datet 0x06 Error: $!";
+      my $th = threads->create(\&server, $cl) or print LOG purdydate() . " 0x06 Error: $!";
       $th->detach()
-        or print LOG "$datet 0x05 Error: Thread detach request failed. $!\n";
+        or print LOG purdydate() . " 0x05 Error: Thread detach request failed. $!\n";
     }
   };    # eval
   if ($@) {
@@ -97,7 +95,6 @@ close(STDERR);
 sub server {
   my $cl = shift;
   # upgrade INET socket to SSL
-  $datet = purdydate();
   $cl    = IO::Socket::SSL->start_SSL(
     $cl,
     SSL_server          => 1,
@@ -106,18 +103,16 @@ sub server {
     SSL_verifycn_name   => $host,
     SSL_verifycn_scheme => 'default',
     SSL_hostname        => $host)
-    or print LOG "$datet 0x01 Error: $@";
+    or print LOG purdydate() . " 0x01 Error: $@";
   # unblock
   my $flags = fcntl($cl, F_GETFL, 0) or print LOG purdydate() . " 0x09 $cl->peerhost $!";
-  #  fcntl($cl, F_SETFL, $flags) or print LOG "$datet 0x0C $cl->peerhost $!";
+  #  fcntl($cl, F_SETFL, $flags) or print LOG purdydate() . " 0x0C $cl->peerhost $!";
   my $rndid    = genuniq();
   my $filename = $pasteroot . $rndid;
-  $datet = purdydate();
-  print LOG $datet . " 0x00 " . $cl->peerhost . "/" . $cl->peerport;
+  print LOG purdydate() . " 0x00 " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : storing at $pasteroot$rndid\n";
   print STDOUT "$rndid : storing at $pasteroot$rndid\n";
-  $datet = purdydate();
-  print LOG $datet . " 0x00 " . $cl->peerhost . "/" . $cl->peerport;
+  print LOG purdydate() . " 0x00 " . $cl->peerhost . "/" . $cl->peerport;
   print LOG " $rndid : serving at $srvname/p/$rndid\n";
   print STDOUT "$rndid : serving at $srvname/p/$rndid\n";
   print $cl "$srvname/p/$rndid\n";
@@ -167,7 +162,7 @@ END {
     if (-e $pidfile) {
       unless ($SIG{TERM} || $SIG{INT}) {
         print STDERR
-          "$datet 0x02 Error: Something unusual happened... check $logfile\n";
+          purdydate() . " 0x02 Error: Something unusual happened... check $logfile\n";
       }
       print LOG purdydate() . " 0x0B Removing lockfile...\n";
       unlink($pidfile);
