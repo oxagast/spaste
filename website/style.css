@@ -1,0 +1,104 @@
+body {
+  background-color: white;
+  font-family: terminus, monospace;
+}
+
+::selection{
+  background-color: black;
+  color: white;
+}
+
+.spaced{
+  margin-top:10px;
+  margin-bottom:10px;
+}
+
+.special{
+  margin-top:5px;
+  margin-bottom:5px;
+}
+
+.whiteText{
+  color: white;
+}
+
+.blackText{
+  color: black;
+}
+
+.magentaText{
+  color: magenta;
+  padding-left: 15px;
+}
+
+.hlpMessage{
+  color: white;
+  margin-top: 10px;
+}
+
+.reddishText{
+  margin-top: 10px;
+  color:#E15D44;
+}
+
+
+p{
+  margin: 0px;
+  padding-left: 15px;
+  color: black;
+}
+
+.half{
+  display: inline-block;
+  padding-left: 15px;
+  color: white;
+  /*float:left;*/
+  width: 50%;
+}
+
+a{
+  color: black;
+  text-shadow: 0 0 1px lightskyblue;
+  text-decoration:none;
+}
+
+a:hover{
+  /* background-color: lightgreen; */
+  background-color: white;
+  color: #808080;
+}
+
+.aquaText{
+  color:aqua;
+  padding-left: 15px;
+}
+
+.tangerineText{
+  color:#EFC050;
+  padding-left: 15px;
+}
+
+
+.greenText{
+  color: lime;
+}
+
+.blueText{
+  color:blue;
+}
+
+.greyText{
+  color: grey;
+  font-style: italic;
+}
+
+.inputText{
+  color: black;
+  background-color: white;
+  border: none;
+  font-family: monospace;
+  user-select: none;
+  outline: none;
+  overflow: visible;
+  width: 50%;
+}

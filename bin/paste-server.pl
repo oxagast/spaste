@@ -119,16 +119,16 @@ sub server {
   open(P, '>', $filename);
   my $switch = 0;
   while (my $line = $cl->getline()) {    # i can make getline work like this
-    if ($line =~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {    # non printable chars
-      print $cl "0x03 Error: Nonprintable chars not supported.";
-      print LOG purdydate() . " "
-        . "0x03 Error: Nonprintable chars not supported.\n";
-      unlink($filename);
-      $cl->close();
-      return 1;
-    } else {
+  #  if ($line =~ m/[\x00\x01\x0E-\x16\x7F-\xFF]/) {    # non printable chars
+  #    print $cl "0x03 Error: Nonprintable chars not supported.";
+  #    print LOG purdydate() . " "
+  #      . "0x03 Error: Nonprintable chars not supported.\n";
+  #    unlink($filename);
+  #    $cl->close();
+  #    return 1;
+  #  } else {
       print P $line;
-    }
+  #  }
     if ($switch == 0) {
       $switch = 1;
       print $cl "<<END>>\n\n";
