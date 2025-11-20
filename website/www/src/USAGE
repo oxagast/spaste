@@ -1,0 +1,21 @@
+The most straightforward way to install now is by running install.sh.
+
+echo abc | paste-client.exe --port 8866     (windows)
+
+echo abc | paste-client.pl                  (linux)
+
+or
+
+echo abc | paste-client.pl --server spaste.oxasploits.com --port 8000
+
+or
+
+echo abc | timeout 1s openssl s_client -quiet -servername spaste.oxasploits.com -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v "END" | tr -d '\n' && echo
+
+To make the below command easier to use in practice, add it as a function to in your zsh or bash startup files.  It should look like:
+
+alias "timeout 1s openssl s_client -quiet -servername spaste.oxasploits.com -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v END | tr -d '\n'; echo"
+
+Source your shell, and then you can paste from your shell using:
+
+echo abc | sp
