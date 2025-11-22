@@ -146,6 +146,9 @@ sub server {
 sub genuniq {
   my $pasid;        # for unique paste identifier
   my @set = ('A' .. 'Z', 'a' .. 'z', 0 .. 9);
+  # 62 characters in set by 12 is around 18.3T permutations
+  # this should be cyrptographically secure enough for our
+  # purposes.
   $pasid .= $set[rand($#set)] for 1 .. 12;
   return $pasid;    # push it back
 }
