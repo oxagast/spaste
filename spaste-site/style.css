@@ -1,6 +1,7 @@
 body {
-  background-color: white;
+  background-color: #081B14;
   font-family: terminus, monospace;
+  font-size: 14px;
 }
 
 ::selection{
@@ -19,26 +20,17 @@ body {
 }
 
 .whiteText{
-  color: white;
+  color: #00DF72;
 }
 
 .blackText{
-  color: black;
+  color: #00DF72;
 }
 
-.magentaText{
-  color: magenta;
-  padding-left: 15px;
-}
 
 .hlpMessage{
-  color: white;
+  color: #00DF72;
   margin-top: 10px;
-}
-
-.reddishText{
-  margin-top: 10px;
-  color:#E15D44;
 }
 
 
@@ -57,48 +49,37 @@ p{
 }
 
 a{
-  color: black;
+  color: #00DF72;
   text-shadow: 0 0 1px lightskyblue;
   text-decoration:none;
 }
 
 a:hover{
   /* background-color: lightgreen; */
-  background-color: white;
+  background-color: #081B14;
   color: #808080;
 }
 
-.aquaText{
-  color:aqua;
-  padding-left: 15px;
-}
-
-.tangerineText{
-  color:#EFC050;
-  padding-left: 15px;
-}
-
-
-.greenText{
-  color: lime;
-}
-
-.blueText{
-  color:blue;
-}
-
 .greyText{
-  color: grey;
-  font-style: italic;
+  color: #00FF72;
 }
 
 .inputText{
-  color: black;
-  background-color: white;
+  color: #00DF72;
+  background-color: #081B14;
   border: none;
   font-family: monospace;
   user-select: none;
   outline: none;
   overflow: visible;
   width: 50%;
+}
+
+img{
+  width: 18%;
+  height: 18%;
+  position: fixed;
+  display: block;
+  margin: auto;
+  right: 30px;
 }

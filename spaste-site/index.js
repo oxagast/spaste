@@ -1,26 +1,14 @@
 /**
- * Defines various functions to give functionality to
- * the terminal website 
- *
- * @summary gives functionality to terminal website 
- * @author Patrick McCarty <patricksantos1234567@gmail.com>
- *
- * Created at     : 2022-11-19 12:21:56 
- * Last modified  : 2022-12-30 12:44:00
+ * Edited for use on spaste.oxasploits.com by Marshall Whittaker <oxagast@oxasploits.com>
+ * All website code credit goes to Matrick McCarty <patricksantos1234567@gmail.com>
  */
 
 
-/** 
- * sleeps for a given number of ms
- */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
-/** 
- * decide how the program should resopond to certain key presses
- */
 function choosePath(e){
 
   document.getElementById("myInput").focus();
@@ -51,9 +39,6 @@ function choosePath(e){
 }
 
 
-/** 
- * called at the start of the program. Creates text box, displays logo and help message
- */
 async function start(){
   let newLine = document.createElement("div");
   newLine.className = "spaced";
@@ -92,19 +77,13 @@ async function start(){
   let helpMessage = document.createElement("p");
   helpMessage.className = "hlpMessage";
   helpMessage.id = "hlp";
-  helpMessage.textContent = "Type " + "\'help\' for the list of commands!";
-
-  /* logo(true); */
+  helpMessage.textContent = "Welcome to the oxasploits public paste server!";
 
   document.getElementById("invisible_div").appendChild(helpMessage);
   document.getElementById("myInput").focus();
 }
 
 
-/** 
- * copies input box and contents into a new string and appends it to the screen.
- * Then decides what function to call based on the input in the text box
- */
 function printUser(){
 
   x = document.getElementById("myInput").value;
@@ -158,8 +137,10 @@ function printUser(){
     author();
   } else if(x.toLowerCase() == "email"){
     email();
+  } else if(x.toLowerCase() == "github"){
+    repo();
   } else if(x.toLowerCase() == "usage"){
-    usage();i
+    usage();
   } else if(x.toLowerCase() == "install"){
     installing();
   } else if(x.toLowerCase() == "history"){
@@ -167,35 +148,25 @@ function printUser(){
   }else{
     invalid();
   }
-
   element = document.getElementById("sp");
   element.scrollIntoView();
-
 }
 
-
-/** 
- * clears DOM elements from the 'invisible_div', leaving only the input box
- */
 function clear(){
   let element = document.getElementById("invisible_div");
   element.innerHTML = '';
 }
 
-
-/** 
- * displays the various commands of this website
- */
 function help(){
-
   const commands = []
   commands[0] = 'help' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'print commands';
   commands[1] = 'clear' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'clear terminal';
   commands[2] = 'author' + '\xa0\xa0\xa0\xa0\xa0\xa0' + 'about spaste\'s author';
-  commands[3] = 'usage' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'display spaste usage help page';
-  commands[4] = 'install' + '\xa0\xa0\xa0\xa0\xa0' + 'display spaste install help page';
-  commands[5] = 'email' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'author email';
-  commands[6] = 'history' + '\xa0\xa0\xa0\xa0\xa0' + 'previously used commands';
+  commands[3] = 'github' + '\xa0\xa0\xa0\xa0\xa0\xa0' + 'furnish a link to the spaste git repository';
+  commands[4] = 'usage' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'display spaste usage help page';
+  commands[5] = 'install' + '\xa0\xa0\xa0\xa0\xa0' + 'display spaste install help page';
+  commands[6] = 'email' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'author email';
+  commands[7] = 'history' + '\xa0\xa0\xa0\xa0\xa0' + 'previously used commands';
 
   for(let i = 0; i < commands.length; i++){
     let buf = document.createElement("p");
@@ -205,10 +176,6 @@ function help(){
   }
 }
 
-
-/** 
- * displays message for invalid commands
- */
 function invalid(){
   const store = document.createElement("div");
   store.className = "blackText";
@@ -224,9 +191,6 @@ function invalid(){
   document.getElementById("invisible_div").appendChild(store);
 }
 
-/** 
- * prints a discription about who I am
- */
 function author(){
   const store = document.createElement("div");
   const par = document.createElement("p");
@@ -243,9 +207,6 @@ function author(){
 }
 
 
-/** 
- * gives link to email
- */
 function email(){
   const store = document.createElement("p");
   store.textContent = "my email: ";
@@ -254,6 +215,20 @@ function email(){
 
   link.href = "mailto:oxagast@oxasploits.com";
   store.appendChild(link);
+   store.className = "blackText";
+
+  document.getElementById("invisible_div").appendChild(store);
+}
+
+function repo(){
+  const store = document.createElement("p");
+  store.textContent = "The spaste ";
+  const link = document.createElement("a");
+  link.textContent = "git repo";
+
+  link.href = "https://github.com/oxagast/spaste";
+  store.appendChild(link);
+   store.className = "blackText";
   document.getElementById("invisible_div").appendChild(store);
 }
 
@@ -275,7 +250,7 @@ function installing(){
   const par = document.createElement("p");
   par.className = "half";
 
-  par.textContent = "Install: ./install.sh";
+  par.textContent = "Install:  ./install.sh";
 
   store.appendChild(par);
     par.className = "blackText";
@@ -283,9 +258,6 @@ function installing(){
 }
 
 
-/**
- * Display history
- */
 function history(){
   for(let i = 0; i < hist.length; i++){
     let buf = document.createElement("p");
@@ -297,7 +269,6 @@ function history(){
 
 
 window.addEventListener("keydown", choosePath); // listen for key presses
-
 var x = "";			// the input that will be in the input box
 var sleepTime = 30; // the time  between each color change for logo
 var hist = [];		// an array to store all commands excecuted by the user
