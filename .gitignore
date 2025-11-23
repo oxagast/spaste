@@ -1,3 +1,4 @@
+*.swp
 keys/*
 *.pl.tdy
 *.pid
