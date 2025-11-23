@@ -44,7 +44,8 @@ $keyfile   = $config->{SSL}{keyfile};
 $pidfile   = $config->{Settings}{pidfile};
 $pasteroot = $config->{Server}{pasteroot};
 $logfile   = $config->{Settings}{logfile};    # log
-my $ver = "v1.2.3";                           # hell yea, new revision!
+$seclvl    = $config->{Settings}{seclvl};     # security level
+my $ver = "v1.3";                             # hell yea, new revision!
                                               # can we have a party
                                               # with lots of hookers?
                                               # bonus points for anal beads
@@ -66,6 +67,7 @@ LOG->autoflush();
 print LOG purdydate() . " 0x00 Starting spaste $ver using $host:$port\n";
 my $siteroot = $pasteroot;
 $siteroot =~ s|/p/$||;
+print LOG purdydate() . " 0x00 Using security level: $seclvl\n";
 chdir "$siteroot" or die purdydate() . " 0x0A $!";
 my $sock = IO::Socket::IP->new(
                                Listen    => SOMAXCONN,
@@ -149,7 +151,7 @@ sub genuniq {
   # 62 characters in set by 12 is around 18.3T permutations
   # this should be cyrptographically secure enough for our
   # purposes.
-  $pasid .= $set[rand($#set)] for 1 .. 12;
+  $pasid .= $set[rand($#set)] for 1 .. $seclvl;
   return $pasid;    # push it back
 }
 
