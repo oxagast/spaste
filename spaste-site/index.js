@@ -1,6 +1,6 @@
 /**
  * Edited for use on spaste.oxasploits.com by Marshall Whittaker <oxagast@oxasploits.com>
- * All website code credit goes to Matrick McCarty <patricksantos1234567@gmail.com>
+ * Original source credit goes to Matrick McCarty <patricksantos1234567@gmail.com>
  */
 
 
@@ -77,7 +77,7 @@ async function start(){
   let helpMessage = document.createElement("p");
   helpMessage.className = "hlpMessage";
   helpMessage.id = "hlp";
-  helpMessage.textContent = "Welcome to the oxasploits public paste server!";
+  helpMessage.textContent = "Type 'help' to get started.";
 
   document.getElementById("invisible_div").appendChild(helpMessage);
   document.getElementById("myInput").focus();
@@ -133,16 +133,34 @@ function printUser(){
     help();
   } else if(x.toLowerCase() == ""){
     // do nothing
-  } else if(x.toLowerCase() == "author"){
+  } else if(x.toLowerCase().startsWith("userinfo")){
     author();
-  } else if(x.toLowerCase() == "email"){
+  } else if((x.toLowerCase().startsWith("sudo") || (x.toLowerCase().startsWith("su ")))){
+    sudo();
+  } else if((x.toLowerCase().startsWith("contacts")) || x.toLowerCase().startsWith("mail")){
     email();
-  } else if(x.toLowerCase() == "github"){
+  } else if(x.toLowerCase() == "cat github.txt"){
     repo();
-  } else if(x.toLowerCase() == "usage"){
+  } else if(x.toLowerCase() == "cat"){
+    cat();
+  } else if(x.toLowerCase().startsWith("ls")){
+    listdir();
+  } else if(x.toLowerCase() == "cat usage.txt"){
     usage();
-  } else if(x.toLowerCase() == "install"){
+  } else if (x.toLowerCase() == "man spaste"){
+    mansp();
+  } else if(x.toLowerCase().startsWith("man ")){
+    badman();
+  } else if(x.toLowerCase() == "man"){
+    badman2();
+  } else if(x.toLowerCase() == "ls -la" || x.toLowerCase() == "ls -al" || x.toLowerCase() == "ls -l" || x.toLowerCase() == "ls --all"){
+    listdir();
+  } else if(x.toLowerCase() == "cat install.txt"){
     installing();
+  } else if(x.toLowerCase().startsWith("cat ")){
+    badcat();
+  } else if(x.toLowerCase() == "id") {
+    userid();
   } else if(x.toLowerCase() == "history"){
 	history();
   }else{
@@ -159,14 +177,16 @@ function clear(){
 
 function help(){
   const commands = []
-  commands[0] = 'help' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'print commands';
-  commands[1] = 'clear' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'clear terminal';
-  commands[2] = 'author' + '\xa0\xa0\xa0\xa0\xa0\xa0' + 'about spaste\'s author';
-  commands[3] = 'github' + '\xa0\xa0\xa0\xa0\xa0\xa0' + 'furnish a link to the spaste git repository';
-  commands[4] = 'usage' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'display spaste usage help page';
-  commands[5] = 'install' + '\xa0\xa0\xa0\xa0\xa0' + 'display spaste install help page';
-  commands[6] = 'email' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'author email';
-  commands[7] = 'history' + '\xa0\xa0\xa0\xa0\xa0' + 'previously used commands';
+  commands[0] = 'help' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'print commands';
+  commands[1] = 'clear' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'clear terminal';
+  commands[2] = 'userinfo' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'about spaste\'s author';
+  commands[3] = 'cat github.txt' + '\xa0\xa0\xa0\xa0\xa0\xa0' + 'furnish a link to the spaste git repository';
+  commands[4] = 'cat usage.txt' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'display spaste usage help page';
+  commands[5] = 'cat install.txt' + '\xa0\xa0\xa0\xa0\xa0' + 'display spaste install help page';
+  commands[6] = 'contacts' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'author email';
+  commands[7] = 'history' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'previously used commands';
+  commands[7] = 'man spaste' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'spaste manual entry';
+
 
   for(let i = 0; i < commands.length; i++){
     let buf = document.createElement("p");
@@ -181,7 +201,9 @@ function invalid(){
   store.className = "blackText";
 
   const err = document.createElement("div");
-  err.appendChild(document.createTextNode("\'" + x + "\'" + " is not a valid command"));
+  // print permission denied of the command name only without the arguments
+  let cmdName = x.split(" ")[0];
+  err.appendChild(document.createTextNode(cmdName + ": permission denied."));
 
   const hlp = document.createElement("div");
   hlp.appendChild(document.createTextNode("Type " + "\'help\' for the list of commands"));
@@ -209,7 +231,7 @@ function author(){
 
 function email(){
   const store = document.createElement("p");
-  store.textContent = "my email: ";
+  store.textContent = "1. ";
   const link = document.createElement("a");
   link.textContent = "oxagast@oxasploits.com";
 
@@ -251,6 +273,108 @@ function installing(){
   par.className = "half";
 
   par.textContent = "Install:  ./install.sh";
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+function cat() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "cat: This command requies an argument!";
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+function listdir() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "github.txt install.txt usage.txt";
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+function sudo() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "... yeah, nice try, dickhole.";
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+
+function mansp() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "cat /etc/passwd | timeout 3s openssl s_client -quiet -servername spaste.oxasploits.com -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v END | tr -d '\\n'; echo";
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+
+function badman2() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "man: This command requires and argument!"; 
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+function badman() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "man: No manual entry for " + x.substring(4).trim(); 
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+
+function userid() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "uid=1000(nobody) gid=55(nogroup) groups=5(nogroup),55(spaste)";
+
+  store.appendChild(par);
+    par.className = "blackText";
+  document.getElementById("invisible_div").appendChild(par);
+}
+
+
+
+
+function badcat() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "cat: No such file or directory!";
 
   store.appendChild(par);
     par.className = "blackText";
