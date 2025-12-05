@@ -1,4 +1,4 @@
-# [https://spaste.oxasploits.com](Spaste)
+# [spaste](https://spaste.oxasploits.com)
 ## A pure perl SSL encrypted port of fiche/termbin.com.
 
 ### Notes
