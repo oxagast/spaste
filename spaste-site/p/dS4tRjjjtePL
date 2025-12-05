@@ -1,0 +1,2 @@
+GET /devicedesc.xml HTTP/1.1
+

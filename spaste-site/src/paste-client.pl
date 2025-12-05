@@ -1,0 +1,1 @@
+/home/spaste/spaste/bin/paste-client.pl

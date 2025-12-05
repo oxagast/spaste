@@ -1,7 +1,14 @@
 body {
-  background-color: #081B14;
+  background-color: #091D14;
   font-family: terminus, monospace;
   font-size: 14px;
+  text-rendering: optimizeLegibility;
+  /* macOS/iOS Chrome, Safari, Firefox (grayscale anti-aliasing) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Non-standard, but some browsers support a version of this */
+  font-smooth: antialiased;
 }
 
 ::selection{
@@ -10,8 +17,8 @@ body {
 }
 
 .spaced{
-  margin-top:10px;
-  margin-bottom:10px;
+  margin-top:1px;
+  margin-bottom:1px;
 }
 
 .special{
@@ -19,20 +26,9 @@ body {
   margin-bottom:5px;
 }
 
-.whiteText{
-  color: #00DF72;
+.green-text{
+  color: #69CB93;
 }
-
-.blackText{
-  color: #00DF72;
-}
-
-
-.hlpMessage{
-  color: #00DF72;
-  margin-top: 10px;
-}
-
 
 p{
   margin: 0px;
@@ -56,17 +52,13 @@ a{
 
 a:hover{
   /* background-color: lightgreen; */
-  background-color: #081B14;
+  background-color: #091D14;
   color: #808080;
 }
 
-.greyText{
-  color: #00FF72;
-}
-
 .inputText{
-  color: #00DF72;
-  background-color: #081B14;
+  color: #69CB93;
+  background-color: #091D14;
   border: none;
   font-family: monospace;
   user-select: none;
@@ -75,11 +67,26 @@ a:hover{
   width: 50%;
 }
 
-img{
-  width: 18%;
-  height: 18%;
+.logo_img{
+  width: 8%;
+  height: 8%;
   position: fixed;
   display: block;
   margin: auto;
+  bottom: 50px;
   right: 30px;
+}
+
+.clone_vid{
+  width: 533px;
+  height: 110px;
+  position: absolute;
+  display: block;
+  margin: auto;
+}
+
+.left_align{
+  width: 100%;
+  margin-left: 0px;
+  height: 289px;
 }

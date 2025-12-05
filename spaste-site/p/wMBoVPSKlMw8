@@ -1,0 +1,30 @@
+[global]
+workgroup = MILLER
+netbios name = miller.lab
+server string = TCSC Fileserve
+security = user
+passdb backend = tdbsam
+encrypt passwords = yes
+
+interfaces = 127.0.0.0/8 enp0s3
+log file = /var/log/samba/log.%m
+max log size = 1000
+logging = file
+panic action = /usr/share/samba/panic-action %d
+
+
+;   server role = standalone server
+
+;   map to guest = bad user
+
+
+[tcscshare]
+path = /srv
+valid users = student
+public = no
+writable = yes
+browsable = yes
+read only = no
+guest ok = no
+create mask = 0755
+directory mask = 0755

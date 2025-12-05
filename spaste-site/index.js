@@ -1,6 +1,6 @@
 /**
  * Edited for use on spaste.oxasploits.com by Marshall Whittaker <oxagast@oxasploits.com>
- * Original source credit goes to Matrick McCarty <patricksantos1234567@gmail.com>
+ * Idea from Matrick McCarty <patricksantos1234567@gmail.com>
  */
 
 
@@ -40,6 +40,7 @@ function choosePath(e){
 
 
 async function start(){
+
   let newLine = document.createElement("div");
   newLine.className = "spaced";
   newLine.id = "sp";
@@ -53,33 +54,13 @@ async function start(){
   tbox.className = "inputText";
   tbox.spellcheck = false;
   tbox.id = "myInput";
-
-  username.appendChild(document.createTextNode("nobody@spaste.oxasploits.com"));
-  username.className = "blackText";
-
-  col.appendChild(document.createTextNode(":"));
-  col.className = "blackText";
-
-  til.appendChild(document.createTextNode("~"));
-  til.className = "blackText";
-
-  dol.appendChild(document.createTextNode("$"));
-  dol.className = "blackText";
-
+  await sleep(7700);
+  username.appendChild(document.createTextNode("nobody@spaste.oxasploits.com:~$ "));
+  username.className = "green-text";
   newLine.appendChild(username);
-  newLine.appendChild(col);
-  newLine.appendChild(til);
-  newLine.appendChild(dol);
 
   newLine.appendChild(tbox);
   document.body.appendChild(newLine);
-
-  let helpMessage = document.createElement("p");
-  helpMessage.className = "hlpMessage";
-  helpMessage.id = "hlp";
-  helpMessage.textContent = "Type 'help' to get started.";
-
-  document.getElementById("invisible_div").appendChild(helpMessage);
   document.getElementById("myInput").focus();
 }
 
@@ -95,27 +76,13 @@ function printUser(){
   let col = document.createElement("span");
   let til = document.createElement("span");
   let dol = document.createElement("span");
-
-  username.appendChild(document.createTextNode("nobody@spaste.oxasploits.com"));
-  username.className = "blackText";
-
-  col.appendChild(document.createTextNode(":"));
-  col.className = "blackText";
-
-  til.appendChild(document.createTextNode("~"));
-  til.className = "blackText";
-
-  dol.appendChild(document.createTextNode("$"));
-  dol.className = "blackText";
-
-  newLine.appendChild(username);
-  newLine.appendChild(col);
-  newLine.appendChild(til);
-  newLine.appendChild(dol);
+  username.appendChild(document.createTextNode("nobody@spaste.oxasploits.com:~$ "));
+  username.className = "green-text";
+ newLine.appendChild(username);
 
   let thing = document.createElement("span");
   thing.appendChild(document.createTextNode(" " + x));
-  thing.className = "greyText";
+  thing.className = "green-text";
   newLine.appendChild(thing);
 
   document.getElementById("invisible_div").appendChild(newLine);
@@ -147,16 +114,20 @@ function printUser(){
     listdir();
   } else if(x.toLowerCase() == "cat usage.txt"){
     usage();
-  } else if (x.toLowerCase() == "man spaste"){
+  } else if ((x.toLowerCase() == "man spaste") || (x.toLowerCase() == "man sp")) {
     mansp();
   } else if(x.toLowerCase().startsWith("man ")){
     badman();
   } else if(x.toLowerCase() == "man"){
     badman2();
-  } else if(x.toLowerCase() == "ls -la" || x.toLowerCase() == "ls -al" || x.toLowerCase() == "ls -l" || x.toLowerCase() == "ls --all"){
+  } else if((x.toLowerCase() == "ls -la") || (x.toLowerCase() == "ls -al") || (x.toLowerCase() == "ls -l") || (x.toLowerCase() == "ls --all")){
     listdir();
   } else if(x.toLowerCase() == "cat install.txt"){
     installing();
+  } else if(x.toLowerCase().startsWith("alias")){
+    aliassp();
+  } else if(x.toLowerCase().startsWith("cat ")){
+    badcat();
   } else if(x.toLowerCase().startsWith("cat ")){
     badcat();
   } else if(x.toLowerCase() == "id") {
@@ -186,19 +157,19 @@ function help(){
   commands[6] = 'contacts' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'author email';
   commands[7] = 'history' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'previously used commands';
   commands[7] = 'man spaste' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'spaste manual entry';
-
+  commands[8] = 'alias sp' + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'show shell alias to be installed';
 
   for(let i = 0; i < commands.length; i++){
     let buf = document.createElement("p");
     buf.textContent = commands[i];
-    buf.className = "blackText";
+    buf.className = "green-text";
     document.getElementById("invisible_div").appendChild(buf);
   }
 }
 
 function invalid(){
   const store = document.createElement("div");
-  store.className = "blackText";
+  store.className = "green-text";
 
   const err = document.createElement("div");
   // print permission denied of the command name only without the arguments
@@ -223,7 +194,7 @@ function author(){
       + " mechanical things, cooking, as well as hanging with my loving girlfriend.  If you would like"
       + " to see more of my projects, visit https://oxasploits.com!";
 
-   par.className = "blackText";
+   par.className = "green-text";
   store.appendChild(par);
   document.getElementById("invisible_div").appendChild(par);
 }
@@ -237,7 +208,7 @@ function email(){
 
   link.href = "mailto:oxagast@oxasploits.com";
   store.appendChild(link);
-   store.className = "blackText";
+   store.className = "green-text";
 
   document.getElementById("invisible_div").appendChild(store);
 }
@@ -250,7 +221,7 @@ function repo(){
 
   link.href = "https://github.com/oxagast/spaste";
   store.appendChild(link);
-   store.className = "blackText";
+   store.className = "green-text";
   document.getElementById("invisible_div").appendChild(store);
 }
 
@@ -263,7 +234,7 @@ function usage(){
 
   store.appendChild(par);
 
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -275,7 +246,7 @@ function installing(){
   par.textContent = "Install:  ./install.sh";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -287,7 +258,7 @@ function cat() {
   par.textContent = "cat: This command requies an argument!";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -299,7 +270,7 @@ function listdir() {
   par.textContent = "github.txt install.txt usage.txt";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -311,7 +282,7 @@ function sudo() {
   par.textContent = "... yeah, nice try, dickhole.";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -324,10 +295,21 @@ function mansp() {
   par.textContent = "cat /etc/passwd | timeout 3s openssl s_client -quiet -servername spaste.oxasploits.com -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v END | tr -d '\\n'; echo";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
+function aliassp() {
+  const store = document.createElement("div");
+  const par = document.createElement("p");
+  par.className = "half";
+
+  par.textContent = "sp=\"timeout 3s openssl s_client -quiet -servername spaste.oxasploits.com -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v END | tr -d '\\n'; echo\"";
+
+  store.appendChild(par);
+    par.className = "green-text";
+  document.getElementById("invisible_div").appendChild(par);
+}
 
 function badman2() {
   const store = document.createElement("div");
@@ -337,7 +319,7 @@ function badman2() {
   par.textContent = "man: This command requires and argument!"; 
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -349,7 +331,7 @@ function badman() {
   par.textContent = "man: No manual entry for " + x.substring(4).trim(); 
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -362,7 +344,7 @@ function userid() {
   par.textContent = "uid=1000(nobody) gid=55(nogroup) groups=5(nogroup),55(spaste)";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -377,7 +359,7 @@ function badcat() {
   par.textContent = "cat: No such file or directory!";
 
   store.appendChild(par);
-    par.className = "blackText";
+    par.className = "green-text";
   document.getElementById("invisible_div").appendChild(par);
 }
 
@@ -386,7 +368,7 @@ function history(){
   for(let i = 0; i < hist.length; i++){
     let buf = document.createElement("p");
     buf.textContent = hist[i];
-    buf.className = "blackText";
+    buf.className = "green-text";
     document.getElementById("invisible_div").appendChild(buf);
   }
 }
