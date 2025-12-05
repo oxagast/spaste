@@ -1,6 +1,0 @@
-nc spaste.oxasploits.com 8866
-nc spaste.oxasploits.com 8866
-nc spaste.oxasploits.com 8866
-
-
-curl --http0.9 http://spaste.oxasploits.com:8866

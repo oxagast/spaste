@@ -1,5 +1,0 @@
-GET / HTTP/1.1
-Host: spaste.oxasploits.com:8866
-User-Agent: curl/8.13.0
-Accept: */*
-
