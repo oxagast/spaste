@@ -8,10 +8,14 @@ For the server I suggest adding an ssl group and spaste user, the systemd startu
 openssl or perl
 
 ### Install
-To install, run `install.sh`
+To install (this is a local install, no sudo needed), run:<br>
+`./install.sh`<br>
+or add the following line to your shell's startup file:<br>
+`alias sp='timeout 3s openssl s_client -quiet -servername spaste.oxasploits.com -verify_return_error -connect spaste.oxasploits.com:8866 2>/dev/null | grep -v END | tr -d "\n"; echo'`
+
 
 ### Use
-Useage: `echo "yes hello" | sp`
+Useage:<br> `echo "yes hello" | sp`
 
 ### Thanks
 Thanks for a bugfix, brianx!
